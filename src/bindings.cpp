@@ -18,11 +18,9 @@ void define_module_functions(nb::module_& m)
 
 void define_rubberband_option_enum(nb::module_& m)
 {
-  nb::enum_<rb::RubberBandStretcher::Option>(m, "Option", nb::is_arithmetic(), "TODO: docs...")
+  nb::enum_<rb::RubberBandStretcher::Option>(m, "Option")
       .value("ProcessOffline", rb::RubberBandStretcher::Option::OptionProcessOffline)
       .value("ProcessRealTime", rb::RubberBandStretcher::Option::OptionProcessRealTime)
-      .value("StretchElastic", rb::RubberBandStretcher::Option::OptionStretchElastic)
-      .value("StretchPrecise", rb::RubberBandStretcher::Option::OptionStretchPrecise)
       .value("TransientsCrisp", rb::RubberBandStretcher::Option::OptionTransientsCrisp)
       .value("TransientsMixed", rb::RubberBandStretcher::Option::OptionTransientsMixed)
       .value("TransientsSmooth", rb::RubberBandStretcher::Option::OptionTransientsSmooth)
@@ -49,14 +47,14 @@ void define_rubberband_option_enum(nb::module_& m)
       .value("EngineFaster", rb::RubberBandStretcher::Option::OptionEngineFaster)
       .value("EngineFiner", rb::RubberBandStretcher::Option::OptionEngineFiner);
 
-  nb::enum_<rb::RubberBandStretcher::PresetOption>(m, "OptionsPreset", nb::is_arithmetic(), "TODO: docs...")
+  nb::enum_<rb::RubberBandStretcher::PresetOption>(m, "OptionsPreset", nb::is_arithmetic())
       .value("Default", rb::RubberBandStretcher::PresetOption::DefaultOptions)
       .value("Percussive", rb::RubberBandStretcher::PresetOption::PercussiveOptions);
 }
 
 void define_rubberband_stretcher_class(nb::module_& m)
 {
-  nb::class_<rb::RubberBandStretcher>(m, "RubberBandStretcher", "TODO: docs...")
+  nb::class_<rb::RubberBandStretcher>(m, "RubberBandStretcher")
       // TODO: add init version with logger
       .def(nb::init<size_t, size_t, int, double, double>(),
            "sample_rate"_a,
@@ -69,7 +67,7 @@ void define_rubberband_stretcher_class(nb::module_& m)
       .def_prop_rw("pitch_scale", &rb::RubberBandStretcher::getPitchScale, &rb::RubberBandStretcher::setPitchScale)
       .def_prop_rw("formant_scale_r3", &rb::RubberBandStretcher::getFormantScale, &rb::RubberBandStretcher::setFormantScale)
       .def("set_frequency_cutoff_r2", &rb::RubberBandStretcher::setFrequencyCutoff, "n"_a, "f"_a)
-      .def("get_frequency_cutoff_r2", &rb::RubberBandStretcher::getFrequencyCutoff)
+      .def("get_frequency_cutoff_r2", &rb::RubberBandStretcher::getFrequencyCutoff, "n"_a)
       // setters only
       .def("set_transients_options_r2_realtime", &rb::RubberBandStretcher::setTransientsOption, "options"_a)
       .def("set_detector_options_r2_realtime", &rb::RubberBandStretcher::setDetectorOption, "options"_a)
@@ -96,7 +94,7 @@ void define_rubberband_stretcher_class(nb::module_& m)
       .def("reset", &rb::RubberBandStretcher::reset)
       .def(
           "study_offline",
-          [](rb::RubberBandStretcher& stretcher, NbAudioArrayArg_t audio, bool const is_final)
+          [](rb::RubberBandStretcher& stretcher, NbAudioArrayArg_t audio, bool const final)
           {
             size_t const channels_num = stretcher.getChannelCount();
             size_t const samples_num = audio.shape(RB_SAMPLE_IDX);
@@ -106,15 +104,14 @@ void define_rubberband_stretcher_class(nb::module_& m)
             }
 
             auto const& audio_per_channel = get_audio_ptr_per_channel(audio.data(), channels_num, samples_num);
-            stretcher.study(audio_per_channel.data(), samples_num, is_final);
+            stretcher.study(audio_per_channel.data(), samples_num, final);
           },
           "audio_data"_a,
-          "is_final"_a = false,
-          nb::call_guard<nb::gil_scoped_release>(),
-          "TODO: docs...")
+          "final"_a = false,
+          nb::call_guard<nb::gil_scoped_release>())
       .def(
           "process",
-          [](rb::RubberBandStretcher& stretcher, NbAudioArrayArg_t audio, bool const is_final)
+          [](rb::RubberBandStretcher& stretcher, NbAudioArrayArg_t audio, bool const final)
           {
             size_t const channels_num = stretcher.getChannelCount();
             size_t const samples_num = audio.shape(RB_SAMPLE_IDX);
@@ -124,12 +121,11 @@ void define_rubberband_stretcher_class(nb::module_& m)
             }
 
             auto const& audio_per_channel = get_audio_ptr_per_channel(audio.data(), channels_num, samples_num);
-            stretcher.process(audio_per_channel.data(), samples_num, is_final);
+            stretcher.process(audio_per_channel.data(), samples_num, final);
           },
           "audio_data"_a,
-          "is_final"_a = false,
-          nb::call_guard<nb::gil_scoped_release>(),
-          "TODO: docs...")
+          "final"_a = false,
+          nb::call_guard<nb::gil_scoped_release>())
       .def(
           "retrieve",
           [](rb::RubberBandStretcher& stretcher, size_t samples_num)
@@ -145,8 +141,7 @@ void define_rubberband_stretcher_class(nb::module_& m)
             return audio;
           },
           "samples_num"_a,
-          nb::call_guard<nb::gil_scoped_release>(),
-          "TODO: docs...")
+          nb::call_guard<nb::gil_scoped_release>())
       .def("calculate_stretch_r2_offline", &rb::RubberBandStretcher::calculateStretch);
 }
 
@@ -154,7 +149,6 @@ void define_rubberband_stretcher_class(nb::module_& m)
 
 NB_MODULE(pylibrb_ext, m)
 {
-  m.doc() = "RubberBand Python extension";
   define_constants(m);
   define_module_functions(m);
   define_rubberband_option_enum(m);
