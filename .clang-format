@@ -1,0 +1,33 @@
+BasedOnStyle: Chromium
+ColumnLimit: 150
+BinPackArguments: False
+BinPackParameters: false
+AllowAllArgumentsOnNextLine: false
+AllowAllConstructorInitializersOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
+ExperimentalAutoDetectBinPacking: false
+
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterCaseLabel:        false
+  AfterClass:            true
+  AfterControlStatement: true
+  AfterEnum:             false
+  AfterFunction:         true
+  AfterNamespace:        false
+  AfterStruct:           true
+  AfterUnion:            false
+  AfterExternBlock:      false
+  BeforeCatch:           true
+  BeforeElse:            true
+  BeforeLambdaBody:      true
+  BeforeWhile:           false
+  SplitEmptyFunction:    false
+  SplitEmptyRecord:      false
+  SplitEmptyNamespace:   false
+  IndentBraces:          false
+
+AlignAfterOpenBracket: Align
+PenaltyBreakAssignment: 70
+PenaltyBreakBeforeFirstCallParameter: 100
+PenaltyBreakOpenParenthesis: 100

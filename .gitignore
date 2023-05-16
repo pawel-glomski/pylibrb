@@ -1,0 +1,5 @@
+.vscode/
+*.egg-info/
+_skbuild/
+build/
+__pycache__
