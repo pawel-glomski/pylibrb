@@ -4,7 +4,6 @@ import numpy as np
 
 import pylibrb.pylibrb_ext
 
-
 MIN_SAMPLE_RATE: int
 '''Minimum sample rate an audio can have.'''
 
@@ -28,40 +27,40 @@ class Option(Flag):
   '''Processing options for the timestretcher. The preferred options should normally be set in the
   constructor, as a bitwise OR of the option flags. The default value (Option.PRESET_DEFAULT) is 
   intended to give good results in most situations.
-     - Flags prefixed `Option.Process` determine how the timestretcher will be invoked. These
+     - Flags prefixed `Option.PROCESS` determine how the timestretcher will be invoked. These
        options may not be changed after construction. The Process setting is likely to depend on
        your architecture: non-real-time operation on seekable files: Offline; real-time or streaming
        operation: RealTime.
-     - Flags prefixed `Option.Engine` select the core Rubber Band processing engine to be used.
+     - Flags prefixed `Option.ENGINE` select the core Rubber Band processing engine to be used.
        These options may not be changed after construction.
-     - Flags prefixed `Option.Transients` control the component frequency phase-reset mechanism in
+     - Flags prefixed `Option.TRANSIENTS` control the component frequency phase-reset mechanism in
        the R2 engine, that may be used at transient points to provide clarity and realism to
        percussion and other significant transient sounds. These options have no effect when using
        the R3 engine. These options may be changed after construction when running in real-time
        mode, but not when running in offline mode.
-     - Flags prefixed `Option.Detector` control the type of transient detector used in the R2
+     - Flags prefixed `Option.DETECTOR` control the type of transient detector used in the R2
        engine. These options have no effect when using the R3 engine. These options may be changed
        after construction when running in real-time mode, but not when running in offline mode.
-     - Flags prefixed `Option.Phase` control the adjustment of component frequency phases in the R2
+     - Flags prefixed `Option.PHASE` control the adjustment of component frequency phases in the R2
        engine from one analysis window to the next during non-transient segments. These options have
        no effect when using the R3 engine. These options may be changed at any time.
-     - Flags prefixed `Option.Threading` control the threading model of the stretcher. These options
+     - Flags prefixed `Option.THREADING` control the threading model of the stretcher. These options
        may not be changed after construction.
-     - Flags prefixed `Option.Window` influence the window size for FFT processing. In the R2 engine
+     - Flags prefixed `Option.WINDOW` influence the window size for FFT processing. In the R2 engine
        these affect the resulting sound quality but have relatively little effect on processing
        speed. With the R3 engine they can dramatically affect processing speed as well as output
        quality. These options may not be changed after construction.
-     - Flags prefixed `Option.Smoothing` control the use of window-presum FFT and time-domain
+     - Flags prefixed `Option.SMOOTHING` control the use of window-presum FFT and time-domain
        smoothing in the R2 engine. These options have no effect when using the R3 engine.These
        options may not be changed after construction.
-     - Flags prefixed `Option.Formant` control the handling of formant shape (spectral envelope)
+     - Flags prefixed `Option.FORMANT` control the handling of formant shape (spectral envelope)
        when pitch-shifting. These options affect both the R2 and R3 engines. These options may be
        changed at any time.
-     - Flags prefixed `Option.Pitch` control the method used for pitch shifting. These options
+     - Flags prefixed `Option.PITCH` control the method used for pitch shifting. These options
        affect only realtime mode. In offline mode the method is not adjustable. In the R2 engine
        these options may be changed at any time; in the R3 engine they may be set only on
        construction.
-     - Flags prefixed `Option.Channels` control the method used for processing two-channel stereo
+     - Flags prefixed `Option.CHANNELS` control the method used for processing two-channel stereo
        audio. These options may not be changed after construction.
     '''
 
@@ -190,7 +189,7 @@ class Option(Flag):
   '''Reset component phases at the peak of each transient (the start of a significant note or
   percussive event). This, the default setting, usually results in a clear-sounding output; but it
   is not always consistent, and may cause interruptions in stable sounds present at the same time as
-  transient events. The `Option.Detector` flags (below) can be used to tune this to some extent.
+  transient events. The `Option.DETECTOR` flags (below) can be used to tune this to some extent.
   '''
 
   TRANSIENTS_MIXED = ...
@@ -320,7 +319,7 @@ class RubberBandStretcher:
 
   @property
   def engine_version(self) -> int:
-    '''The active internal engine version, according to the `Option.Engine`  flag supplied on
+    '''The active internal engine version, according to the `Option.ENGINE`  flag supplied on
     construction. This will return 2 for the R2 (Faster) engine or 3 for the R3 (Finer) engine.'''
 
   @property
@@ -576,7 +575,7 @@ class RubberBandStretcher:
     '''
 
   def set_detector_options(self, options: int) -> None:
-    '''Change an `Option.Detector` configuration setting.
+    '''Change an `Option.DETECTOR` configuration setting.
     
     This may be called at any time in RealTime mode.
     
@@ -586,7 +585,7 @@ class RubberBandStretcher:
 
     Args:
       options:
-        New `Option.Detector` settings.
+        New `Option.DETECTOR` settings.
 
     '''
 
@@ -604,7 +603,7 @@ class RubberBandStretcher:
     '''
 
   def set_formant_options(self, options: int) -> None:
-    '''Change an `Option.Formant` configuration setting.
+    '''Change an `Option.FORMANT` configuration setting.
 
     This may be called at any time in any mode.
 
@@ -613,7 +612,7 @@ class RubberBandStretcher:
 
     Args:
       options:
-        New `Option.Formant` settings.
+        New `Option.FORMANT` settings.
     '''
 
   def set_frequency_cutoff(self, n: int, f: float) -> None:
@@ -700,7 +699,7 @@ class RubberBandStretcher:
     '''
 
   def set_phase_options(self, options: int) -> None:
-    '''Change an `Option.Phase` configuration setting This may be called at any time in any mode.
+    '''Change an `Option.PHASE` configuration setting This may be called at any time in any mode.
     
     This has no effect when using the R3 engine.
 
@@ -709,11 +708,11 @@ class RubberBandStretcher:
 
     Args:
       options:
-        New `Option.Phase` settings.
+        New `Option.PHASE` settings.
     '''
 
   def set_pitch_options(self, options: int) -> None:
-    '''Change an `Option.Pitch` configuration setting.
+    '''Change an `Option.PITCH` configuration setting.
     
     This may be called at any time in RealTime mode.
 
@@ -723,11 +722,11 @@ class RubberBandStretcher:
 
     Args:
       options:
-        New `Option.Pitch` settings.
+        New `Option.PITCH` settings.
     '''
 
   def set_transients_options(self, options: int) -> None:
-    '''Change an `Option.Transients` configuration setting.
+    '''Change an `Option.TRANSIENTS` configuration setting.
     
     This may be called at any time in RealTime mode.
     
@@ -737,7 +736,7 @@ class RubberBandStretcher:
 
     Args:
       options:
-        New `Option.Transients` settings.
+        New `Option.TRANSIENTS` settings.
     '''
 
   def study(self, audio: np.ndarray, final: bool) -> None:
