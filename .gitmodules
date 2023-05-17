@@ -1,3 +1,6 @@
 [submodule "3rdparty/rubberband"]
 	path = 3rdparty/rubberband
 	url = https://github.com/breakfastquay/rubberband.git
+[submodule "3rdparty/fmt"]
+	path = 3rdparty/fmt
+	url = https://github.com/fmtlib/fmt.git

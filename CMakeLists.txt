@@ -21,13 +21,15 @@ if (NOT SKBUILD)
   =====================================================================")
 endif()
 
-# Create CMake targets for Python components needed by nanobind
-find_package(Python 3.8 COMPONENTS Interpreter Development.Module REQUIRED)
+set(CMAKE_POSITION_INDEPENDENT_CODE On) # for fmt
 
 if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
+
+# Create CMake targets for Python components needed by nanobind
+find_package(Python 3.8 COMPONENTS Interpreter Development.Module REQUIRED)
 
 # Detect the installed nanobind package and import it into CMake
 execute_process(
@@ -37,6 +39,7 @@ list(APPEND CMAKE_PREFIX_PATH "${NB_DIR}")
 
 find_package(nanobind CONFIG REQUIRED)
 
+add_subdirectory(3rdparty/fmt)
 
 set(SOURCES_DIR "${CMAKE_SOURCE_DIR}/src")
 
@@ -60,6 +63,7 @@ set(SOURCE_LIST
 )
 
 nanobind_add_module(pylibrb_ext ${HEADER_LIST} ${SOURCE_LIST})
+target_link_libraries(pylibrb_ext PUBLIC fmt::fmt)
 target_include_directories(pylibrb_ext 
   PUBLIC ${RUBBERBAND_INCLUDE_DIR}
 )
