@@ -4,7 +4,6 @@ import numpy as np
 
 import pylibrb.pylibrb_ext
 
-
 MAX_CHANNELS_NUM: int
 '''Maximum number of channels an audio can have.'''
 
@@ -20,7 +19,7 @@ DTYPE_NAME: str
 
 class Option(Flag):
   '''Processing options for the timestretcher. The preferred options should normally be set in the
-  constructor, as a bitwise OR of the option flags. The default value (OptionsPreset.Options) is 
+  constructor, as a bitwise OR of the option flags. The default value (OptionsPreset.OPTIONS) is 
   intended to give good results in most situations.
      - Flags prefixed `Option.Process` determine how the timestretcher will be invoked. These
        options may not be changed after construction. The Process setting is likely to depend on
@@ -59,7 +58,7 @@ class Option(Flag):
        audio. These options may not be changed after construction.
     '''
 
-  ChannelsApart = ...
+  CHANNELS_APART = ...
   '''Channels are handled for maximum individual fidelity, at the expense of synchronisation.
   In the R3 engine, this means frequency-bin synchronisation is maintained more closely for
   lower-frequency content than higher. In R2, it means the stereo channels are processed
@@ -69,7 +68,7 @@ class Option(Flag):
   phasy). This option is the default.
   '''
 
-  ChannelsTogether = ...
+  CHANNELS_TOGETHER = ...
   '''Channels are handled for higher synchronisation at some expense of individual fidelity. In
   particular, a stretcher processing two channels will treat its input as a stereo pair and aim to
   maximise clarity at the centre and preserve mono compatibility. This gives relatively less stereo
@@ -77,99 +76,99 @@ class Option(Flag):
   content, but the results may be more appropriate for many situations making use of stereo mixes.
   '''
 
-  DetectorCompound = ...
+  DETECTOR_COMPOUND = ...
   '''Use a general-purpose transient detector which is likely to be good for most situations.
   This is the default.
   '''
 
-  DetectorPercussive = ...
+  DETECTOR_PERCUSSIVE = ...
   '''Detect percussive transients.'''
 
-  DetectorSoft = ...
+  DETECTOR_SOFT = ...
   '''Use an onset detector with less of a bias toward percussive transients.
   This may give better results with certain material (e.g. relatively monophonic piano music).
   '''
 
-  EngineFaster = ...
+  ENGINE_FASTER = ...
   '''Use the Rubber Band Library R2 (Faster) engine. This is the engine implemented in Rubber Band
   Library v1.x and v2.x, and it remains the default in newer versions. It uses substantially less
   CPU than the R3 engine and there are still many situations in which it is likely to be the more
   appropriate choice.
   '''
 
-  EngineFiner = ...
+  ENGINE_FINER = ...
   '''Use the Rubber Band Library R3 (Finer) engine. This engine was introduced in Rubber Band
   Library v3.0. It produces higher-quality results than the R2 engine for most material, especially
   complex mixes, vocals and other sounds that have soft onsets and smooth pitch changes, and music
   with substantial bass content. However, it uses much more CPU power than the R2 engine.
   '''
 
-  FormantPreserved = ...
+  FORMANT_PRESERVED = ...
   '''Preserve the spectral envelope of the unshifted signal. This permits shifting the note
   frequency without so substantially affecting the perceived pitch profile of the voice or
   instrument.
   '''
 
-  FormantShifted = ...
+  FORMANT_SHIFTED = ...
   '''Apply no special formant processing. The spectral envelope will be pitch shifted as normal.
   This is the default.
   '''
 
-  PhaseIndependent = ...
+  PHASE_INDEPENDENT = ...
   '''Adjust the phase in each frequency bin independently from its neighbours. This usually results
   in a slightly softer, phasier sound.
   '''
 
-  PhaseLaminar = ...
+  PHASE_LAMINAR = ...
   '''Adjust phases when stretching in such a way as to try to retain the continuity of phase
   relationships between adjacent frequency bins whose phases are behaving in similar ways. This, the
   default setting, should give good results in most situations.
   '''
 
-  PitchHighConsistency = ...
+  PITCH_HIGH_CONSISTENCY = ...
   '''Use a method that supports dynamic pitch changes without discontinuities, including when
   crossing the 1.0 pitch scale. This may cost more in CPU than the default, especially when the
   pitch scale is exactly 1.0. You should use this option whenever you wish to support dynamically
   changing pitch shift during processing.
   '''
 
-  PitchHighQuality = ...
+  PITCH_HIGH_QUALITY = ...
   '''Favour sound quality over CPU cost. Use this for fixed pitch shifts where sound quality is of
   most concern. Do not use this for arbitrarily time-varying pitch shifts
-  (see `Option.PitchHighConsistency` below).'''
+  (see `Option.PITCH_HIGH_CONSISTENCY` below).'''
 
-  PitchHighSpeed = ...
+  PITCH_HIGH_SPEED = ...
   '''Favour CPU cost over sound quality. This is the default. Use this when time-stretching only, or
   for fixed pitch shifts where CPU usage is of concern. Do not use this for arbitrarily time-varying
-  pitch shifts (see `Option.PitchHighConsistency` below).
+  pitch shifts (see `Option.PITCH_HIGH_CONSISTENCY` below).
   '''
 
-  ProcessOffline = ...
+  PROCESS_OFFLINE = ...
   '''Run the stretcher in offline mode. In this mode the input data needs to be provided twice, once
   to `study_offline()`, which calculates a stretch profile for the audio, and once to `process()`,
   which stretches it.
   '''
 
-  ProcessRealTime = ...
+  PROCESS_REALTIME = ...
   '''Run the stretcher in real-time mode. In this mode only `process()` should be called, and the
   stretcher adjusts dynamically in response to the input audio.
   '''
 
-  SmoothingOff = ...
+  SMOOTHING_OFF = ...
   '''Do not use time-domain smoothing.'''
 
-  SmoothingOn = ...
+  SMOOTHING_ON = ...
   '''Use time-domain smoothing. This will result in a softer sound with some audible artifacts
   around sharp transients, but it may be appropriate for longer stretches of some instruments and
-  can mix well with `Option.WindowShort`.
+  can mix well with `Option.WINDOW_SHORT`.
   '''
 
-  ThreadingAlways = ...
-  '''Use multiple threads in any situation where `Option.ThreadingAuto` would do so, except omit the
-  check for multiple CPUs and instead assume it to be true.
+  THREADING_ALWAYS = ...
+  '''Use multiple threads in any situation where `Option.THREADING_AUTO` would do so, except omit
+  the check for multiple CPUs and instead assume it to be true.
   '''
 
-  ThreadingAuto = ...
+  THREADING_AUTO = ...
   '''Permit the stretcher to determine its own threading model. In the R2 engine this means using
   one processing thread per audio channel in offline mode if the stretcher is able to determine that
   more than one CPU is available, and one thread only in realtime mode. The R3 engine does not
@@ -177,46 +176,46 @@ class Option(Flag):
   This is the default.
   '''
 
-  ThreadingNever = ...
+  THREADING_NEVER = ...
   '''Never use more than one thread.'''
 
-  TransientsCrisp = ...
+  TRANSIENTS_CRISP = ...
   '''Reset component phases at the peak of each transient (the start of a significant note or
   percussive event). This, the default setting, usually results in a clear-sounding output; but it
   is not always consistent, and may cause interruptions in stable sounds present at the same time as
   transient events. The `Option.Detector` flags (below) can be used to tune this to some extent.
   '''
 
-  TransientsMixed = ...
+  TRANSIENTS_MIXED = ...
   '''Reset component phases at the peak of each transient, outside a frequency range typical of
   musical fundamental frequencies. The results may be more regular for mixed stable and percussive
-  notes than `Option.TransientsCrisp`, but with a "phasier" sound. The balance may sound very good
+  notes than `Option.TRANSIENTS_CRISP`, but with a "phasier" sound. The balance may sound very good
   for certain types of music and fairly bad for others.
   '''
 
-  TransientsSmooth = ...
+  TRANSIENTS_SMOOTH = ...
   '''Do not reset component phases at any point. The results will be smoother and more regular but
   may be less clear than with either of the other transients flags.
   '''
 
-  WindowLong = ...
+  WINDOW_LONG = ...
   '''Use a longer window. With the R2 engine this is likely to result in a smoother sound at the
   expense of clarity and timing. The R3 engine currently ignores this option, treating it like
-  `Option.WindowStandard`.
+  `Option.WINDOW_STANDARD`.
   '''
 
-  WindowShort = ...
+  WINDOW_SHORT = ...
   '''Use a shorter window. This has different effects with R2 and R3 engines. With the R2 engine it
   may result in crisper sound for audio that depends strongly on its timing qualities, but is likely
   to sound worse in other ways and will have similar efficiency. With the R3 engine, it causes the
   engine to be restricted to a single window size, resulting in both dramatically faster processing
-  and lower delay than `Option.WindowStandard`, but at the expense of some sound quality. It may
+  and lower delay than `Option.WINDOW_STANDARD`, but at the expense of some sound quality. It may
   still sound better for non-percussive material than the R2 engine. With both engines it reduces
   the start delay somewhat (see `get_start_delay_realtime)` which may be useful for real-time
   handling.
   '''
 
-  WindowStandard = ...
+  WINDOW_STANDARD = ...
   '''Use the default window size. The actual size will vary depending on other parameters. This
   option is expected to produce better results than the other window options in most situations.
   In the R3 engine this causes the engine's full multi-resolution processing scheme to be used.
@@ -224,8 +223,8 @@ class Option(Flag):
 
 
 class OptionsPreset(Flag):
-  Default = ...
-  Percussive = ...
+  DEFAULT = ...
+  PERCUSSIVE = ...
 
 
 class RubberBandStretcher:
@@ -276,10 +275,10 @@ class RubberBandStretcher:
   def __init__(self,
                sample_rate: int,
                channels: int,
-               options: int = pylibrb.OptionsPreset.Default,
+               options: int = pylibrb.OptionsPreset.DEFAULT,
                initial_time_ratio: float = 1.0,
                initial_pitch_scale: float = 1.0) -> None:
-    '''Construct a time and pitch stretcher object to run at the given sample rate, with the given
+    '''Constructs a time and pitch stretcher object to run at the given sample rate, with the given
     number of channels.
 
     Both of the stretcher engines provide their best balance of quality with efficiency at sample
@@ -289,7 +288,7 @@ class RubberBandStretcher:
 
     Initial time and pitch scaling ratios and other processing options may be provided. In
     particular, the behaviour of the stretcher depends strongly on whether offline or real-time mode
-    is selected on construction (via `Option.ProcessOffline` or `Option.ProcessRealTime` option.
+    is selected on construction (via `Option.PROCESS_OFFLINE` or `Option.PROCESS_REALTIME` option.
     Offline is the default).
 
     Args:
@@ -298,7 +297,9 @@ class RubberBandStretcher:
       channels:
         Number of channels of the audio.
       options (optional):
-        Processing options. Defaults to pylibrb.OptionsPreset.Default.
+        Processing options. The behaviour of the stretcher depends strongly on whether offline or
+        real-time mode is selected. See `pylibrb.Option` for possible options. Defaults to
+        `pylibrb.OptionsPreset.DEFAULT`.
       initial_time_ratio (optional):
         Initial time ratio. Defaults to 1.0.
       initial_pitch_scale (optional):
@@ -311,7 +312,7 @@ class RubberBandStretcher:
 
   @property
   def engine_version(self) -> int:
-    '''The active internal engine version, according to the `OptionEngine  flag supplied on
+    '''The active internal engine version, according to the `Option.Engine`  flag supplied on
     construction. This will return 2 for the R2 (Faster) engine or 3 for the R3 (Finer) engine.'''
 
   @property
@@ -324,19 +325,19 @@ class RubberBandStretcher:
     unaffected.
 
     By default this is set to the special value of 0.0, which causes the scale to be calculated
-    automatically. It will be treated as 1.0 / the pitch scale if `Option.FormantPreserved` is
-    specified, or 1.0 for `Option.FormantShifted`.
+    automatically. It will be treated as 1.0 / the pitch scale if `Option.FORMANT_PRESERVED` is
+    specified, or 1.0 for `Option.FORMANT_SHIFTED`.
 
     Conversely, if this is set to a value other than the default 0.0, formant shifting will happen
-    regardless of the state of the `Option.FormantPreserved`/`Option.FormantShifted` option.
+    regardless of the state of the `Option.FORMANT_PRESERVED`/`Option.FORMANT_SHIFTED` option.
 
     This property is provided for special effects only. You do not need to call it for ordinary
     pitch shifting, with or without formant preservation - just specify or omit the
-    `Option.FormantPreserved` option as appropriate. Use this property only if you want to shift
+    `Option.FORMANT_PRESERVED` option as appropriate. Use this property only if you want to shift
     formants by a distance other than that of the overall pitch shift.
 
-    This property is supported only in the R3 (`Option.EngineFiner`) engine. It has no effect in R2
-    (`Option.EngineFaster`).
+    This property is supported only in the R3 (`Option.ENGINE_FINER`) engine. It has no effect in R2
+    (`Option.ENGINE_FASTER`).
     '''
 
   @formant_scale_r3.setter
@@ -753,8 +754,10 @@ def create_audio_array(channels_num: int, samples_num: int) -> np.ndarray:
   '''Creates an array for audio with `channels_num` channels and `samples_num` samples
 
   Args:
-    channels_num: Number of channels that the audio will have.
-    samples_num: Number of samples that the audio will have.
+    channels_num:
+      Number of channels that the audio will have.
+    samples_num:
+      Number of samples that the audio will have.
 
   Returns:
     np.ndarray:
