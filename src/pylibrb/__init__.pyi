@@ -4,6 +4,13 @@ import numpy as np
 
 import pylibrb.pylibrb_ext
 
+
+MIN_SAMPLE_RATE: int
+'''Minimum sample rate an audio can have.'''
+
+MAX_SAMPLE_RATE: int
+'''Maximum sample rate an audio can have.'''
+
 MAX_CHANNELS_NUM: int
 '''Maximum number of channels an audio can have.'''
 
@@ -19,7 +26,7 @@ DTYPE_NAME: str
 
 class Option(Flag):
   '''Processing options for the timestretcher. The preferred options should normally be set in the
-  constructor, as a bitwise OR of the option flags. The default value (OptionsPreset.OPTIONS) is 
+  constructor, as a bitwise OR of the option flags. The default value (Option.PRESET_DEFAULT) is 
   intended to give good results in most situations.
      - Flags prefixed `Option.Process` determine how the timestretcher will be invoked. These
        options may not be changed after construction. The Process setting is likely to depend on
@@ -145,7 +152,7 @@ class Option(Flag):
 
   PROCESS_OFFLINE = ...
   '''Run the stretcher in offline mode. In this mode the input data needs to be provided twice, once
-  to `study_offline()`, which calculates a stretch profile for the audio, and once to `process()`,
+  to `study()`, which calculates a stretch profile for the audio, and once to `process()`,
   which stretches it.
   '''
 
@@ -211,7 +218,7 @@ class Option(Flag):
   engine to be restricted to a single window size, resulting in both dramatically faster processing
   and lower delay than `Option.WINDOW_STANDARD`, but at the expense of some sound quality. It may
   still sound better for non-percussive material than the R2 engine. With both engines it reduces
-  the start delay somewhat (see `get_start_delay_realtime)` which may be useful for real-time
+  the start delay somewhat (see `get_start_delay)` which may be useful for real-time
   handling.
   '''
 
@@ -221,10 +228,11 @@ class Option(Flag):
   In the R3 engine this causes the engine's full multi-resolution processing scheme to be used.
   '''
 
+  PRESET_DEFAULT = ...
+  '''Default preset (Offline)'''
 
-class OptionsPreset(Flag):
-  DEFAULT = ...
-  PERCUSSIVE = ...
+  PRESET_PERCUSSIVE = ...
+  '''Percussive preset'''
 
 
 class RubberBandStretcher:
@@ -235,11 +243,11 @@ class RubberBandStretcher:
 
   Offline mode:
     In offline mode, you must provide the audio block-by-block in two passes. In the first pass,
-    call `study_offline()` on each block; in the second pass, call `process()` on each block and
+    call `study()` on each block; in the second pass, call `process()` on each block and
     receive the output via `retrieve()`.
 
     In offline mode, the time and pitch ratios are fixed as soon as the study pass has begun and
-    cannot be changed afterwards. (But see `set_keyframe_map_offline()` for a way to do pre-planned
+    cannot be changed afterwards. (But see `set_keyframe_map()` for a way to do pre-planned
     variable time stretching in offline mode.) Offline mode also performs padding and delay
     compensation so that the stretched result has an exact start and duration.
   
@@ -249,7 +257,7 @@ class RubberBandStretcher:
   
     In real-time mode you can change the time and pitch ratios at any time. You may need to perform
     signal padding and delay compensation in real-time mode; see
-    `get_preferred_start_pad_realtime()` and `get_start_delay_realtime()` for details.
+    `get_preferred_start_pad()` and `get_start_delay()` for details.
   
   Rubber Band Library is RT-safe when used in real-time mode with "normal" processing parameters.
   That is, it performs no allocation, locking, or blocking operations after initialisation during
@@ -275,7 +283,7 @@ class RubberBandStretcher:
   def __init__(self,
                sample_rate: int,
                channels: int,
-               options: int = pylibrb.OptionsPreset.DEFAULT,
+               options: Option = Option.PRESET_DEFAULT,
                initial_time_ratio: float = 1.0,
                initial_pitch_scale: float = 1.0) -> None:
     '''Constructs a time and pitch stretcher object to run at the given sample rate, with the given
@@ -298,8 +306,8 @@ class RubberBandStretcher:
         Number of channels of the audio.
       options (optional):
         Processing options. The behaviour of the stretcher depends strongly on whether offline or
-        real-time mode is selected. See `pylibrb.Option` for possible options. Defaults to
-        `pylibrb.OptionsPreset.DEFAULT`.
+        real-time mode is selected. See `Option` for possible options. Defaults to
+        `Option.PRESET_DEFAULT`.
       initial_time_ratio (optional):
         Initial time ratio. Defaults to 1.0.
       initial_pitch_scale (optional):
@@ -316,7 +324,7 @@ class RubberBandStretcher:
     construction. This will return 2 for the R2 (Faster) engine or 3 for the R3 (Finer) engine.'''
 
   @property
-  def formant_scale_r3(self) -> float:
+  def formant_scale(self) -> float:
     '''Get or set a pitch scale for the vocal formant envelope, separate from the overall pitch
     scale. 
 
@@ -340,8 +348,8 @@ class RubberBandStretcher:
     (`Option.ENGINE_FASTER`).
     '''
 
-  @formant_scale_r3.setter
-  def formant_scale_r3(self) -> float:
+  @formant_scale.setter
+  def formant_scale(self) -> float:
     ...
 
   @property
@@ -357,8 +365,8 @@ class RubberBandStretcher:
 
     If the stretcher was constructed in Offline mode, the pitch scaling ratio is fixed throughout
     operation; this property may be changed any number of times between construction (or a call to
-    `reset()`) and the first call to `study_offline()` or `process()`, but may not be changed after
-    `study_offline()` or `process()` has been called.
+    `reset()`) and the first call to `study()` or `process()`, but may not be changed after
+    `study()` or `process()` has been called.
   
     If the stretcher was constructed in RealTime mode, the pitch scaling ratio may be varied during
     operation; this property may be changed at any time, so long as it is not changed concurrently
@@ -381,8 +389,8 @@ class RubberBandStretcher:
 
     If the stretcher was constructed in Offline mode, the time ratio is fixed throughout operation;
     this property may be changed any number of times between construction (or a call to `reset()`)
-    and the first call to `study_offline()` or `process()`, but may not be changed after
-    `study_offline()` or `process()` has been called.
+    and the first call to `study()` or `process()`, but may not be changed after
+    `study()` or `process()` has been called.
 
     If the stretcher was constructed in RealTime mode, the time ratio may be varied during
     operation; this property may be changed at any time, so long as it is not changed concurrently
@@ -392,10 +400,10 @@ class RubberBandStretcher:
     '''
 
   @time_ratio.setter
-  def time_ratio(self) -> float:
+  def time_ratio(self, ratio: float) -> float:
     ...
 
-  def calculate_stretch_r2_offline(self) -> None:
+  def calculate_stretch(self) -> None:
     '''Force the stretcher to calculate a stretch profile Normally this happens automatically for
     the first `process()` call in offline mode.
 
@@ -417,7 +425,7 @@ class RubberBandStretcher:
       finished.
     '''
 
-  def get_exact_time_points_r2_offline(self) -> list[float]:
+  def get_exact_time_points(self) -> list[float]:
     '''This function is provided for diagnostic purposes only and is supported only with the R2
     engine.
 
@@ -429,7 +437,7 @@ class RubberBandStretcher:
       In realtime mode: An empty list.
     '''
 
-  def get_frequency_cutoff_r2(self, n: int) -> float:
+  def get_frequency_cutoff(self, n: int) -> float:
     '''This function is not for general use and is supported only with the R2 engine.
 
     Args:
@@ -439,7 +447,7 @@ class RubberBandStretcher:
       The value of internal frequency cutoff value n.
     '''
 
-  def get_input_increment_r2(self) -> int:
+  def get_input_increment(self) -> int:
     '''This function is provided for diagnostic purposes only and is supported only with the R2
     engine.
 
@@ -447,7 +455,7 @@ class RubberBandStretcher:
       The value of the internal input block increment value.
     '''
 
-  def get_output_increment_r2(self) -> list[int]:
+  def get_output_increment(self) -> list[int]:
     '''This function is provided for diagnostic purposes only and is supported only with the R2
     engine.
     
@@ -456,10 +464,10 @@ class RubberBandStretcher:
       data, provided the stretch profile has been calculated.
       
       In realtime mode: Any output increments that have accumulated since the last call to
-      `get_output_increment_r2()`, to a limit of 16.
+      `get_output_increment()`, to a limit of 16.
     '''
 
-  def get_phase_reset_curve_r2(self) -> list[float]:
+  def get_phase_reset_curve(self) -> list[float]:
     '''This function is provided for diagnostic purposes only and is supported only with the R2
     engine.
     
@@ -468,10 +476,10 @@ class RubberBandStretcher:
       entire audio data, provided the stretch profile has been calculated.
       
       In realtime mode: Any phase reset points that have accumulated since the last call to
-      `get_phase_reset_curve_r2()`, to a limit of 16.
+      `get_phase_reset_curve()`, to a limit of 16.
     '''
 
-  def get_preferred_start_pad_realtime(self) -> int:
+  def get_preferred_start_pad(self) -> int:
     '''Gets the number of padding samples for the initial `process()` call when in RealTime mode.
  
     In RealTime mode (unlike in Offline mode) the stretcher performs no automatic padding or
@@ -481,13 +489,13 @@ class RubberBandStretcher:
     output sample counts may be lost.
 
     Most applications using RealTime mode should solve this by calling
-    `get_preferred_start_pad_realtime()` and supplying the returned number of (silent) samples at
+    `get_preferred_start_pad()` and supplying the returned number of (silent) samples at
     the start of their input, before their first "true" `process()` call; and then also calling
-    `get_start_delay_realtime()` and trimming the returned number of samples from the start of their
+    `get_start_delay()` and trimming the returned number of samples from the start of their
     stretcher's output.
 
     Ensure you have set the time and pitch scale factors to their proper starting values before
-    calling `get_preferred_start_pad_realtime()` or `get_start_delay_realtime()`.
+    calling `get_preferred_start_pad()` or `get_start_delay()`.
 
     Returns:
       In RealTime mode:
@@ -509,22 +517,22 @@ class RubberBandStretcher:
     See `set_max_process_size()` for a more suitable operating mode for applications that do have
     external block size constraints.
   
-    Note that this value is only relevant to `process()`, not to `study_offline()` (to which you may
+    Note that this value is only relevant to `process()`, not to `study()` (to which you may
     pass any number of samples at a time, and from which there is no output).
 
     Returns:
       The number of audio samples required by the stretcher.
     '''
 
-  def get_start_delay_realtime(self) -> int:
+  def get_start_delay(self) -> int:
     '''Get the output delay of the stretcher.
 
     This is the number of audio samples that one should discard at the start of the output, after
-    padding the start of the input with `get_preferred_start_pad_realtime()`, in order to ensure
+    padding the start of the input with `get_preferred_start_pad()`, in order to ensure
     that the resulting audio has the expected time alignment with the input.
 
     Ensure you have set the time and pitch scale factors to their proper starting values before
-    calling `get_start_delay_realtime()`.
+    calling `get_start_delay()`.
 
     Returns:
       In RunTime mode:
@@ -567,7 +575,7 @@ class RubberBandStretcher:
       than the number of samples currently available.
     '''
 
-  def set_detector_options_r2_realtime(self, options: int) -> None:
+  def set_detector_options(self, options: int) -> None:
     '''Change an `Option.Detector` configuration setting.
     
     This may be called at any time in RealTime mode.
@@ -582,7 +590,7 @@ class RubberBandStretcher:
 
     '''
 
-  def set_expected_input_duration_offline(self, samples: int) -> None:
+  def set_expected_input_duration(self, samples: int) -> None:
     '''Tell the stretcher exactly how many input samples it will receive.
     
     This is only useful in Offline mode, when it allows the stretcher to ensure that the number of
@@ -608,7 +616,7 @@ class RubberBandStretcher:
         New `Option.Formant` settings.
     '''
 
-  def set_frequency_cutoff_r2(self, n: int, f: float) -> None:
+  def set_frequency_cutoff(self, n: int, f: float) -> None:
     '''Set the value of internal frequency cutoff n to f Hz.
 
     This function is not for general use and is supported only with the R2 engine.
@@ -618,7 +626,7 @@ class RubberBandStretcher:
       f: The frequency cutoff value to set.
     '''
 
-  def set_keyframe_map_offline(self, mapping: dict[int, int]) -> None:
+  def set_keyframe_map(self, mapping: dict[int, int]) -> None:
     '''Provide a set of mappings from `before` to `after` sample numbers so as to enforce a
     particular stretch profile.
     
@@ -683,15 +691,15 @@ class RubberBandStretcher:
     `get_samples_required()` for a more suitable operating mode for applications without such
     external constraints.
 
-    This function may not be called after the first call to `study_offline()` or `process()`.
+    This function may not be called after the first call to `study()` or `process()`.
 
-    Note that this value is only relevant to `process()`, not to `study_offline()`.
+    Note that this value is only relevant to `process()`, not to `study()`.
 
     Args:
       samples: The maximum number of samples that will be ever passed in a single `process()` call.
     '''
 
-  def set_phase_options_r2(self, options: int) -> None:
+  def set_phase_options(self, options: int) -> None:
     '''Change an `Option.Phase` configuration setting This may be called at any time in any mode.
     
     This has no effect when using the R3 engine.
@@ -704,7 +712,7 @@ class RubberBandStretcher:
         New `Option.Phase` settings.
     '''
 
-  def set_pitch_options_r2_realtime(self, options: int) -> None:
+  def set_pitch_options(self, options: int) -> None:
     '''Change an `Option.Pitch` configuration setting.
     
     This may be called at any time in RealTime mode.
@@ -718,7 +726,7 @@ class RubberBandStretcher:
         New `Option.Pitch` settings.
     '''
 
-  def set_transients_options_r2_realtime(self, options: int) -> None:
+  def set_transients_options(self, options: int) -> None:
     '''Change an `Option.Transients` configuration setting.
     
     This may be called at any time in RealTime mode.
@@ -732,14 +740,14 @@ class RubberBandStretcher:
         New `Option.Transients` settings.
     '''
 
-  def study_offline(self, audio: np.ndarray, final: bool) -> None:
+  def study(self, audio: np.ndarray, final: bool) -> None:
     '''Provide a block of `samples` samples for the stretcher to study and calculate a stretch
     profile from.
 
     This is only meaningful in Offline mode, and is required if running in that mode.
 
-    You should pass the entire input through `study_offline()` before any `process()` calls are
-    made, as a sequence of blocks in individual `study_offline()` calls, or as a single large block.
+    You should pass the entire input through `study()` before any `process()` calls are
+    made, as a sequence of blocks in individual `study()` calls, or as a single large block.
 
     Args:
       audio:
@@ -751,7 +759,7 @@ class RubberBandStretcher:
 
 
 def create_audio_array(channels_num: int, samples_num: int) -> np.ndarray:
-  '''Creates an array for audio with `channels_num` channels and `samples_num` samples
+  '''Creates an array for audio with `channels_num` channels and `samples_num` samples.
 
   Args:
     channels_num:
@@ -760,8 +768,7 @@ def create_audio_array(channels_num: int, samples_num: int) -> np.ndarray:
       Number of samples that the audio will have.
 
   Returns:
-    np.ndarray:
-      Numpy ndarray with the shape to contain RubberBand-compatible audio with the specified layout
+    Numpy ndarray with RubberBand-compatible shape and dtype.
   '''
 
 

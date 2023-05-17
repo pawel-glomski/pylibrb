@@ -10,10 +10,13 @@ namespace rb = RubberBand;
 namespace nb = nanobind;
 using namespace nb::literals;
 
+constexpr size_t MAX_CHANNELS_NUM = 8;
+constexpr size_t RB_MIN_SAMPLE_RATE = 8000;
+constexpr size_t RB_MAX_SAMPLE_RATE = 192000;
+
 using AudioShape_t = nb::shape<nb::any, nb::any>;
 constexpr size_t RB_CHANNEL_IDX = 0;
 constexpr size_t RB_SAMPLE_IDX = 1;
-constexpr size_t MAX_CHANNELS_NUM = 8;
 
 using DType_t = float;
 constexpr char const* DTYPE_NAME = get_numpy_format_name<DType_t>().data();

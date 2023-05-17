@@ -1,3 +1,5 @@
+#include <string_view>
+#include <type_traits>
 
 template <typename T>
 constexpr std::string_view get_numpy_format_name()
