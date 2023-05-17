@@ -182,7 +182,7 @@ void define_stretcher_method_study(nb::class_<rb::RubberBandStretcher>& cls)
         size_t const samples_num = audio.shape(RB_SAMPLE_IDX);
         if (audio.shape(RB_CHANNEL_IDX) != channels_num)
         {
-          throw std::runtime_error("Wrong number of audio channels");
+          throw nb::value_error("Wrong number of audio channels");
         }
 
         auto const& audio_per_channel = get_audio_ptr_per_channel(audio.data(), channels_num, samples_num);
@@ -203,7 +203,7 @@ void define_stretcher_method_process(nb::class_<rb::RubberBandStretcher>& cls)
         size_t const samples_num = audio.shape(RB_SAMPLE_IDX);
         if (audio.shape(RB_CHANNEL_IDX) != channels_num)
         {
-          throw std::runtime_error("Wrong number of audio channels");
+          throw nb::value_error("Wrong number of audio channels");
         }
 
         auto const& audio_per_channel = get_audio_ptr_per_channel(audio.data(), channels_num, samples_num);
