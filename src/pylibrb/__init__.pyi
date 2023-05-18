@@ -25,6 +25,13 @@ DTYPE_NAME: str
 DType: np.dtype
 '''The data type used internally for audio.'''
 
+AUTO_FORMANT_SCALE: float
+'''Default value of `formant_scale`, which causes the scale to be calculated automatically.
+
+See the documentation of `RubberBandStretcher.formant_scale` for more details.
+'''
+
+
 class Option(Flag):
   '''Processing options for the timestretcher. The preferred options should normally be set in the
   constructor, as a bitwise OR of the option flags. The default value (Option.PRESET_DEFAULT) is 
@@ -333,9 +340,9 @@ class RubberBandStretcher:
     the formant envelope up by one octave; 0.5 down by one octave; or 1.0 leave the formant
     unaffected.
 
-    By default this is set to the special value of 0.0, which causes the scale to be calculated
-    automatically. It will be treated as 1.0 / the pitch scale if `Option.FORMANT_PRESERVED` is
-    specified, or 1.0 for `Option.FORMANT_SHIFTED`.
+    By default this is set to the special value of `AUTO_FORMANT_SCALE`, which causes the scale to
+    be calculated automatically. It will be treated as 1.0 / the pitch scale if
+    `Option.FORMANT_PRESERVED` is specified, or 1.0 for `Option.FORMANT_SHIFTED`.
 
     Conversely, if this is set to a value other than the default 0.0, formant shifting will happen
     regardless of the state of the `Option.FORMANT_PRESERVED`/`Option.FORMANT_SHIFTED` option.
@@ -416,14 +423,10 @@ class RubberBandStretcher:
     `retrieve()`.
 
     Returns:
-      >0: The number of available samples. 
-
-      0: if no samples are available - this usually means more input data needs to be provided,
-      but if the stretcher is running in threaded mode it may just mean that not enough data has
-      yet been processed Call `get_samples_required()` to discover whether more input is needed.
-
-      -1: if all data has been fully processed and all output read, and the stretch process is now
-      finished.
+      The number of available samples or 0 if no samples are available - this usually means more
+      input data needs to be provided, but if the stretcher is running in threaded mode it may just
+      mean that not enough data has yet been processed Call `get_samples_required()` to discover
+      whether more input is needed.
     '''
 
   def get_exact_time_points(self) -> list[float]:
@@ -540,6 +543,14 @@ class RubberBandStretcher:
         The number of audio samples that one should discard at the start of the output
       
       In Offline mode: zero, since padding and delay compensation are handled internally.
+    '''
+
+  def is_done(self) -> bool:
+    '''Checks whether the stretcher has already processed all the provided data and the resulting
+    audio has been retrieved.
+    
+    Returns:
+      `True` if the "final" block has been processed and already retrieved, `False` otherwise.
     '''
 
   def process(self, audio: np.ndarray, final: bool) -> None:
@@ -762,6 +773,8 @@ class RubberBandStretcher:
 def create_audio_array(channels_num: int, samples_num: int) -> np.ndarray:
   '''Creates an array for audio with `channels_num` channels and `samples_num` samples.
 
+  Note that the array elements are not assigned to any value, thus they may contain any values.
+
   Args:
     channels_num:
       Number of channels that the audio will have.
@@ -791,7 +804,3 @@ def set_default_logging_level(level: int) -> None:
         3: Report a large amount of information and also (in the R2 engine) add audible ticks to  
         the output at phase reset points. This is seldom useful.
   '''
-
-
-del np
-del Flag

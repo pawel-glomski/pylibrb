@@ -14,9 +14,12 @@ using namespace nb::literals;
 
 namespace {
 
-constexpr size_t MAX_CHANNELS_NUM = 32;
+constexpr size_t MAX_CHANNELS_NUM = 32;  // TODO: Use small vector instead
 constexpr size_t RB_MIN_SAMPLE_RATE = 8000;
 constexpr size_t RB_MAX_SAMPLE_RATE = 192000;
+
+constexpr int RB_IS_DONE__AVAILABLE_VALUE = -1;
+constexpr float RB_AUTO_FORMANT_SCALE = 0.f;
 
 using AudioShape_t = nb::shape<nb::any, nb::any>;
 constexpr size_t RB_CHANNELS_AXIS = 0;
@@ -88,6 +91,7 @@ void define_constants(nb::module_& m)
   m.attr("CHANNELS_AXIS") = RB_CHANNELS_AXIS;
   m.attr("SAMPLES_AXIS") = RB_SAMPLES_AXIS;
   m.attr("DTYPE_NAME") = DTYPE_NAME;
+  m.attr("AUTO_FORMANT_SCALE") = RB_AUTO_FORMANT_SCALE;
 }
 
 void define_module_functions(nb::module_& m)
@@ -183,7 +187,7 @@ void define_stretcher_read_write_properties(nb::class_<rb::RubberBandStretcher>&
                   &rb::RubberBandStretcher::getFormantScale,
                   [](rb::RubberBandStretcher& stretcher, double const formant_scale)
                   {
-                    if (formant_scale <= 0)
+                    if (formant_scale <= 0 && formant_scale != RB_AUTO_FORMANT_SCALE)
                     {
                       throw nb::value_error(fmt::format("`formant_scale={}` is not supported. Time ratio must be greater than zero.", formant_scale));
                     }
@@ -213,7 +217,13 @@ void define_stretcher_setters_only(nb::class_<rb::RubberBandStretcher>& cls)
 void define_stretcher_getters_only(nb::class_<rb::RubberBandStretcher>& cls)
 {
   // these are not properties, as their values do depend on the current state of the stretcher
-  cls.def("get_available", &rb::RubberBandStretcher::available);
+  cls.def("is_done", [](rb::RubberBandStretcher const& stretcher) { return stretcher.available() == RB_IS_DONE__AVAILABLE_VALUE; });
+  cls.def("get_available",
+          [](rb::RubberBandStretcher const& stretcher)
+          {
+            auto const available = stretcher.available();
+            return available == RB_IS_DONE__AVAILABLE_VALUE ? 0 : available;
+          });
   cls.def("get_preferred_start_pad", &rb::RubberBandStretcher::getPreferredStartPad);
   cls.def("get_start_delay", &rb::RubberBandStretcher::getStartDelay);
   cls.def("get_samples_required", &rb::RubberBandStretcher::getSamplesRequired);
