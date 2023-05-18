@@ -14,7 +14,7 @@ using namespace nb::literals;
 
 namespace {
 
-constexpr size_t MAX_CHANNELS_NUM = 8;
+constexpr size_t MAX_CHANNELS_NUM = 32;
 constexpr size_t RB_MIN_SAMPLE_RATE = 8000;
 constexpr size_t RB_MAX_SAMPLE_RATE = 192000;
 
@@ -31,9 +31,10 @@ using NbAudioArrayRet_t = nb::ndarray<nb::numpy, DType_t, AudioShape_t, nb::c_co
 using Option = rb::RubberBandStretcher::Option;
 using OptionsPreset = rb::RubberBandStretcher::PresetOption;
 
-std::array<DType_t*, MAX_CHANNELS_NUM> get_audio_ptr_per_channel(DType_t* audio_data, size_t const channels_num, size_t const samples_num)
+std::array<DType_t*, MAX_CHANNELS_NUM> get_audio_ptr_per_channel(DType_t* const audio_data, size_t channels_num, size_t const samples_num)
 {
   std::array<DType_t*, MAX_CHANNELS_NUM> audio_rows_per_channel;
+  channels_num = std::min(MAX_CHANNELS_NUM, channels_num);
   for (size_t channel_idx = 0; channel_idx < channels_num; ++channel_idx)
   {
     audio_rows_per_channel[channel_idx] = audio_data + channel_idx * samples_num;
