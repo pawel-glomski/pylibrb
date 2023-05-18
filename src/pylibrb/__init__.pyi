@@ -13,15 +13,17 @@ MAX_SAMPLE_RATE: int
 MAX_CHANNELS_NUM: int
 '''Maximum number of channels an audio can have.'''
 
-CHANNEL_IDX: int
-'''Index of the channel in the shape of an audio array.'''
+CHANNELS_AXIS: int
+'''Axis of channels in an audio array.'''
 
-SAMPLE_IDX: int
-'''Index of the samples in the shape of an audio array.'''
+SAMPLES_AXIS: int
+'''Axis of samples in an audio array.'''
 
 DTYPE_NAME: str
 '''Name of the audio type in NumPy's format.'''
 
+DType: np.dtype
+'''The data type used internally for audio.'''
 
 class Option(Flag):
   '''Processing options for the timestretcher. The preferred options should normally be set in the
@@ -571,7 +573,7 @@ class RubberBandStretcher:
     
     Returns:
       An array with the requested number of samples, or less if the requested amount was greater
-      than the number of samples currently available.
+      than the number of samples currently available (can return an empty array).
     '''
 
   def set_detector_options(self, options: int) -> None:

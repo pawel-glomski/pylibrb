@@ -1,11 +1,61 @@
 #include <fmt/core.h>
 
-#include "bindings.hpp"
+#include <nanobind/nanobind.h>
+#include <nanobind/ndarray.h>
+#include <nanobind/stl/string.h>
+
+#include <rubberband/RubberBandStretcher.h>
+
+#include "general.hpp"
+
+namespace rb = RubberBand;
+namespace nb = nanobind;
+using namespace nb::literals;
 
 namespace {
 
+constexpr size_t MAX_CHANNELS_NUM = 8;
+constexpr size_t RB_MIN_SAMPLE_RATE = 8000;
+constexpr size_t RB_MAX_SAMPLE_RATE = 192000;
+
+using AudioShape_t = nb::shape<nb::any, nb::any>;
+constexpr size_t RB_CHANNELS_AXIS = 0;
+constexpr size_t RB_SAMPLES_AXIS = 1;
+
+using DType_t = float;
+constexpr char const* DTYPE_NAME = get_numpy_format_name<DType_t>().data();
+
+using NbAudioArrayArg_t = nb::ndarray<DType_t, AudioShape_t, nb::c_contig, nb::device::cpu>;
+using NbAudioArrayRet_t = nb::ndarray<nb::numpy, DType_t, AudioShape_t, nb::c_contig, nb::device::cpu>;
+
 using Option = rb::RubberBandStretcher::Option;
 using OptionsPreset = rb::RubberBandStretcher::PresetOption;
+
+std::array<DType_t*, MAX_CHANNELS_NUM> get_audio_ptr_per_channel(DType_t* audio_data, size_t const channels_num, size_t const samples_num)
+{
+  std::array<DType_t*, MAX_CHANNELS_NUM> audio_rows_per_channel;
+  for (size_t channel_idx = 0; channel_idx < channels_num; ++channel_idx)
+  {
+    audio_rows_per_channel[channel_idx] = audio_data + channel_idx * samples_num;
+  }
+  return audio_rows_per_channel;
+}
+
+constexpr std::array<size_t, AudioShape_t::size> create_audio_shape(size_t const channels_num, size_t const samples_num)
+{
+  if constexpr (RB_CHANNELS_AXIS == 0)
+    return {channels_num, samples_num};
+  else
+    return {samples_num, channels_num};
+}
+
+NbAudioArrayRet_t create_audio_array(size_t const channels_num, size_t const samples_num)
+{
+  auto data = new DType_t[channels_num * samples_num];
+  nb::capsule deleter(data, [](void* p) noexcept { delete[] static_cast<DType_t*>(p); });
+
+  return NbAudioArrayRet_t(data, AudioShape_t::size, create_audio_shape(channels_num, samples_num).data(), deleter);
+}
 
 /* function wrappers ******************************************************************************/
 
@@ -34,8 +84,8 @@ void define_constants(nb::module_& m)
   m.attr("MIN_SAMPLE_RATE") = RB_MIN_SAMPLE_RATE;
   m.attr("MAX_SAMPLE_RATE") = RB_MAX_SAMPLE_RATE;
   m.attr("MAX_CHANNELS_NUM") = MAX_CHANNELS_NUM;
-  m.attr("CHANNEL_IDX") = RB_CHANNEL_IDX;
-  m.attr("SAMPLE_IDX") = RB_SAMPLE_IDX;
+  m.attr("CHANNELS_AXIS") = RB_CHANNELS_AXIS;
+  m.attr("SAMPLES_AXIS") = RB_SAMPLES_AXIS;
   m.attr("DTYPE_NAME") = DTYPE_NAME;
 }
 
@@ -179,8 +229,8 @@ void define_stretcher_method_study(nb::class_<rb::RubberBandStretcher>& cls)
       [](rb::RubberBandStretcher& stretcher, NbAudioArrayArg_t audio, bool const final)
       {
         size_t const channels_num = stretcher.getChannelCount();
-        size_t const samples_num = audio.shape(RB_SAMPLE_IDX);
-        if (audio.shape(RB_CHANNEL_IDX) != channels_num)
+        size_t const samples_num = audio.shape(RB_SAMPLES_AXIS);
+        if (audio.shape(RB_CHANNELS_AXIS) != channels_num)
         {
           throw nb::value_error("Wrong number of audio channels");
         }
@@ -200,8 +250,8 @@ void define_stretcher_method_process(nb::class_<rb::RubberBandStretcher>& cls)
       [](rb::RubberBandStretcher& stretcher, NbAudioArrayArg_t audio, bool const final)
       {
         size_t const channels_num = stretcher.getChannelCount();
-        size_t const samples_num = audio.shape(RB_SAMPLE_IDX);
-        if (audio.shape(RB_CHANNEL_IDX) != channels_num)
+        size_t const samples_num = audio.shape(RB_SAMPLES_AXIS);
+        if (audio.shape(RB_CHANNELS_AXIS) != channels_num)
         {
           throw nb::value_error("Wrong number of audio channels");
         }
