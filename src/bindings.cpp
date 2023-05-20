@@ -1,3 +1,5 @@
+#include <array>
+
 #include <fmt/core.h>
 
 #include <nanobind/nanobind.h>
