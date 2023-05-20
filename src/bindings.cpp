@@ -145,7 +145,7 @@ void define_stretcher__init__(nb::class_<rb::RubberBandStretcher>& cls)
       [](rb::RubberBandStretcher* const ptr,
          size_t const sample_rate,
          size_t const channels,
-         std::underlying_type_t<Option> const options,
+         size_t const options,
          double const initial_time_ratio,
          double const initial_pitch_scale)
       {
