@@ -63,7 +63,16 @@ set(SOURCE_LIST
 )
 
 nanobind_add_module(pylibrb_ext ${HEADER_LIST} ${SOURCE_LIST})
-target_link_libraries(pylibrb_ext PUBLIC fmt::fmt)
+
+target_link_libraries(pylibrb_ext PRIVATE fmt::fmt)
+if(APPLE)
+  target_link_libraries(pylibrb_ext PRIVATE "-framework Accelerate")
+endif()
+
+if(WIN32)
+  target_compile_definitions(pylibrb_ext PRIVATE NOMINMAX)
+endif()
+
 target_include_directories(pylibrb_ext 
   PUBLIC ${RUBBERBAND_INCLUDE_DIR}
 )
