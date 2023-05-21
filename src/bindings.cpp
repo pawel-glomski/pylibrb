@@ -220,7 +220,7 @@ void define_stretcher_getters_only(nb::class_<rb::RubberBandStretcher>& cls)
 {
   // these are not properties, as their values do depend on the current state of the stretcher
   cls.def("is_done", [](rb::RubberBandStretcher const& stretcher) { return stretcher.available() == RB_IS_DONE__AVAILABLE_VALUE; });
-  cls.def("get_available",
+  cls.def("available",
           [](rb::RubberBandStretcher const& stretcher)
           {
             auto const available = stretcher.available();

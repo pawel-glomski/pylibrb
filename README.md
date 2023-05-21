@@ -25,12 +25,12 @@ stretcher.set_max_process_size(1024)
 
 # provide the audio to the stretcher, until some output is available
 audio_in = create_audio_array(channels_num=1, samples_num=1024)
-while not stretcher.get_available():
+while not stretcher.available():
   audio_in[:] = 0  # get the next batch of samples, here we just use silence
   stretcher.process(audio_in)
 
 # retrieve the available samples
-audio_out = stretcher.retrieve(stretcher.get_available())
+audio_out = stretcher.retrieve(stretcher.available())
 
 ```
 

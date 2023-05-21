@@ -73,7 +73,7 @@ class TestStretcherInit:
     assert stretcher.engine_version == 3
     assert stretcher.time_ratio == 0.5
     assert stretcher.pitch_scale == 0.5
-    assert stretcher.get_available() == 0
+    assert stretcher.available() == 0
     assert stretcher.is_done() == False
 
 
@@ -106,7 +106,7 @@ class TestRealtimeStretcher:
 
     stretcher.process(audio_data)
 
-    assert stretcher.get_available() == 0
+    assert stretcher.available() == 0
 
   def test_available_should_return_number_of_available_samples_when_enough_samples_provided(
       self, realtime_stretcher: RubberBandStretcher):
@@ -115,7 +115,7 @@ class TestRealtimeStretcher:
 
     stretcher.process(audio_data)
 
-    assert stretcher.get_available() > 0
+    assert stretcher.available() > 0
 
   def test_retrieve_should_return_empty_array_when_result_is_not_available(
       self, realtime_stretcher: RubberBandStretcher):
@@ -133,7 +133,7 @@ class TestRealtimeStretcher:
     audio_data = pylibrb.create_audio_array(stretcher.channels, stretcher.get_samples_required())
 
     stretcher.process(audio_data)
-    available_samples = stretcher.get_available()
+    available_samples = stretcher.available()
 
     assert available_samples > 0
     result = stretcher.retrieve(available_samples)
@@ -161,13 +161,13 @@ class TestRealtimeStretcher:
     for _ in range(iters):
       stretcher.process(audio_data)
       expected_samples += audio_samples * stretcher.time_ratio
-      observed_samples += stretcher.retrieve(stretcher.get_available()).shape[pylibrb.SAMPLES_AXIS]
+      observed_samples += stretcher.retrieve(stretcher.available()).shape[pylibrb.SAMPLES_AXIS]
 
     stretcher.time_ratio = time_ratio
     for i in range(iters):
       stretcher.process(audio_data, final=(i + 1) == iters)
       expected_samples += audio_samples * stretcher.time_ratio
-      observed_samples += stretcher.retrieve(stretcher.get_available()).shape[pylibrb.SAMPLES_AXIS]
+      observed_samples += stretcher.retrieve(stretcher.available()).shape[pylibrb.SAMPLES_AXIS]
 
     relative_error = abs(expected_samples - observed_samples) / expected_samples
     assert relative_error <= 0.05
