@@ -2,8 +2,6 @@ from enum import Flag
 
 import numpy as np
 
-import pylibrb.pylibrb_ext
-
 MIN_SAMPLE_RATE: int
 '''Minimum sample rate an audio can have.'''
 
@@ -21,9 +19,6 @@ SAMPLES_AXIS: int
 
 DTYPE_NAME: str
 '''Name of the audio type in NumPy's format.'''
-
-DType: np.dtype
-'''The data type used internally for audio.'''
 
 AUTO_FORMANT_SCALE: float
 '''Default value of `formant_scale`, which causes the scale to be calculated automatically.

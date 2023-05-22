@@ -36,6 +36,8 @@ using NbAudioArrayRet_t = nb::ndarray<nb::numpy, DType_t, AudioShape_t, nb::c_co
 using Option = rb::RubberBandStretcher::Option;
 using OptionsPreset = rb::RubberBandStretcher::PresetOption;
 
+/* helpers ****************************************************************************************/
+
 std::array<DType_t*, MAX_CHANNELS_NUM> get_audio_ptr_per_channel(DType_t* const audio_data, size_t channels_num, size_t const samples_num)
 {
   std::array<DType_t*, MAX_CHANNELS_NUM> audio_rows_per_channel;
