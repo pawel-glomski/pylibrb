@@ -14,7 +14,6 @@ except ImportError:
 setup(
     packages=['pylibrb'],
     package_dir={'': 'src'},
-    package_data={'': ['py.typed', '*.pyi']},
     include_package_data=True,
     cmake_install_dir='src/pylibrb',
 )
