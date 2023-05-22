@@ -39,7 +39,7 @@ list(APPEND CMAKE_PREFIX_PATH "${NB_DIR}")
 
 find_package(nanobind CONFIG REQUIRED)
 
-add_subdirectory(3rdparty/fmt)
+add_subdirectory(3rdparty/fmt EXCLUDE_FROM_ALL)
 
 set(SOURCES_DIR "${CMAKE_SOURCE_DIR}/src")
 
