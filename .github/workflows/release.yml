@@ -71,10 +71,9 @@ jobs:
       shell: bash
 
     - name: Upload wheels
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         path: wheelhouse/*.whl
-
 
   upload_all:
     name: Upload to PyPI
@@ -93,4 +92,4 @@ jobs:
         path: dist
 
     - name: Publish package distributions to PyPI 
-      uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
+      uses: pypa/gh-action-pypi-publish@release/v1
