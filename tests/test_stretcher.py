@@ -149,8 +149,9 @@ class TestRealtimeStretcher:
       self, time_ratio: float, realtime_stretcher: RubberBandStretcher):
     stretcher = realtime_stretcher
 
-    audio_data = pylibrb.create_audio_array(stretcher.channels, stretcher.get_samples_required())
-    audio_data[:] = 1
+    audio_data = pylibrb.create_audio_array(stretcher.channels,
+                                            stretcher.get_samples_required(),
+                                            init_value=1)
     audio_samples = audio_data.shape[pylibrb.SAMPLES_AXIS]
 
     expected_samples = 0.0

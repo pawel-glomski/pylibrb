@@ -57,10 +57,11 @@ constexpr std::array<size_t, AudioShape_t::size> create_audio_shape(size_t const
     return {samples_num, channels_num};
 }
 
-NbAudioArrayRet_t create_audio_array(size_t const channels_num, size_t const samples_num)
+NbAudioArrayRet_t create_audio_array(size_t const channels_num, size_t const samples_num, DType_t const init_value)
 {
   auto data = new DType_t[channels_num * samples_num];
   nb::capsule deleter(data, [](void* p) noexcept { delete[] static_cast<DType_t*>(p); });
+  std::fill_n(data, channels_num * samples_num, init_value);
 
   return NbAudioArrayRet_t(data, AudioShape_t::size, create_audio_shape(channels_num, samples_num).data(), deleter);
 }
@@ -101,7 +102,7 @@ void define_constants(nb::module_& m)
 void define_module_functions(nb::module_& m)
 {
   m.def("set_default_logging_level", &rb::RubberBandStretcher::setDefaultDebugLevel, "level"_a);
-  m.def("create_audio_array", &create_audio_array, "channels_num"_a, "samples_num"_a);
+  m.def("create_audio_array", &create_audio_array, "channels_num"_a, "samples_num"_a, "init_value"_a = 0);
 }
 
 void define_option_enum(nb::module_& m)

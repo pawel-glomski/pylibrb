@@ -1,4 +1,4 @@
-import pytest
+import numpy as np
 
 import pylibrb
 from pylibrb import create_audio_array, reorder_to_rb, reorder_from_rb
@@ -9,6 +9,12 @@ def test_create_audio_array_should_create_array_with_correct_shape():
 
   assert audio.shape[pylibrb.CHANNELS_AXIS] == 2
   assert audio.shape[pylibrb.SAMPLES_AXIS] == 128
+
+
+def test_create_audio_array_should_create_array_with_correct_value():
+  audio = create_audio_array(2, 128, 321)
+
+  assert np.all(audio == 321)
 
 
 def test_reorder_to_rb_should_do_nothing_when_audio_with_correct_layout():

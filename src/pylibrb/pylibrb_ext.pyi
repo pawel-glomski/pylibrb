@@ -765,19 +765,19 @@ class RubberBandStretcher:
     '''
 
 
-def create_audio_array(channels_num: int, samples_num: int) -> np.ndarray:
+def create_audio_array(channels_num: int, samples_num: int, init_value: float = 0.0) -> np.ndarray:
   '''Creates an array for audio with `channels_num` channels and `samples_num` samples.
-
-  Note that the array elements are not assigned to any value, thus they may contain any values.
 
   Args:
     channels_num:
       Number of channels that the audio will have.
     samples_num:
       Number of samples that the audio will have.
+    init_value:
+      Value that assigned to every element of the array. 
 
   Returns:
-    Numpy ndarray with RubberBand-compatible shape and dtype.
+    Numpy ndarray with pylibrb-compatible shape and dtype.
   '''
 
 
