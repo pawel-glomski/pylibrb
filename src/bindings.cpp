@@ -295,8 +295,7 @@ void define_stretcher_method_retrieve(nb::class_<rb::RubberBandStretcher>& cls)
 
         return audio;
       },
-      "samples_num"_a,
-      nb::call_guard<nb::gil_scoped_release>());
+      "samples_num"_a);
 }
 
 void define_stretcher_simple_methods(nb::class_<rb::RubberBandStretcher>& cls)
