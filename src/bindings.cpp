@@ -288,14 +288,17 @@ void define_stretcher_method_retrieve(nb::class_<rb::RubberBandStretcher>& cls)
         size_t const channels_num = stretcher.getChannelCount();
         samples_num = std::min(samples_num, (size_t)(std::max(0, stretcher.available())));  // available == -1 when done
 
-        NbAudioArrayRet_t audio = create_audio_array(channels_num, samples_num);
-        auto const& audio_per_channel = get_audio_ptr_per_channel(audio.data(), channels_num, samples_num);
+        DType_t* audio_data = new DType_t[channels_num * samples_num];
+        auto const& audio_per_channel = get_audio_ptr_per_channel(audio_data, channels_num, samples_num);
 
         stretcher.retrieve(audio_per_channel.data(), samples_num);
 
-        return audio;
+        nb::gil_scoped_acquire gil_acquired;
+        nb::capsule deleter(audio_data, [](void* p) noexcept { delete[] static_cast<DType_t*>(p); });
+        return NbAudioArrayRet_t(audio_data, AudioShape_t::size, create_audio_shape(channels_num, samples_num).data(), deleter);
       },
-      "samples_num"_a);
+      "samples_num"_a,
+      nb::call_guard<nb::gil_scoped_release>());
 }
 
 void define_stretcher_simple_methods(nb::class_<rb::RubberBandStretcher>& cls)
