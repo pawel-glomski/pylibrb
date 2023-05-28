@@ -2,7 +2,7 @@ import sys
 
 try:
   from skbuild import setup
-  import nanobind
+  import nanobind  # pylint: disable=W0611:unused-import
 except ImportError:
   print(
       'The preferred way to invoke "setup.py" is via pip, as in "pip install .".'
