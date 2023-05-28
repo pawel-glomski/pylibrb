@@ -57,14 +57,35 @@ constexpr std::array<size_t, AudioShape_t::size> create_audio_shape(size_t const
     return {samples_num, channels_num};
 }
 
+NbAudioArrayRet_t ndarray_from_audio_data(DType_t* const data, size_t const channels_num, size_t const samples_num)
+{
+  nb::capsule deleter(data, [](void* p) noexcept { delete[] static_cast<DType_t*>(p); });
+  return NbAudioArrayRet_t(data, AudioShape_t::size, create_audio_shape(channels_num, samples_num).data(), deleter);
+}
+
 NbAudioArrayRet_t create_audio_array(size_t const channels_num, size_t const samples_num, DType_t const init_value)
 {
   auto data = new DType_t[channels_num * samples_num];
-  nb::capsule deleter(data, [](void* p) noexcept { delete[] static_cast<DType_t*>(p); });
   std::fill_n(data, channels_num * samples_num, init_value);
-
-  return NbAudioArrayRet_t(data, AudioShape_t::size, create_audio_shape(channels_num, samples_num).data(), deleter);
+  return ndarray_from_audio_data(data, channels_num, samples_num);
 }
+
+std::pair<DType_t*, size_t> retrieve_audio_data(rb::RubberBandStretcher& stretcher, size_t samples_num)
+{
+  size_t const channels_num = stretcher.getChannelCount();
+  samples_num = std::min(samples_num, (size_t)(std::max(0, stretcher.available())));  // available == -1 when done
+
+  DType_t* audio_data = new DType_t[channels_num * samples_num];
+  auto const& audio_per_channel = get_audio_ptr_per_channel(audio_data, channels_num, samples_num);
+
+  stretcher.retrieve(audio_per_channel.data(), samples_num);
+  return {audio_data, samples_num};
+};
+
+std::pair<DType_t*, size_t> retrieve_available_audio_data(rb::RubberBandStretcher& stretcher)
+{
+  return retrieve_audio_data(stretcher, size_t(-1));
+};
 
 /* function wrappers ******************************************************************************/
 
@@ -263,7 +284,7 @@ void define_stretcher_method_process(nb::class_<rb::RubberBandStretcher>& cls)
 {
   cls.def(
       "process",
-      [](rb::RubberBandStretcher& stretcher, NbAudioArrayArg_t audio, bool const final)
+      [](rb::RubberBandStretcher& stretcher, NbAudioArrayArg_t audio)
       {
         size_t const channels_num = stretcher.getChannelCount();
         size_t const samples_num = audio.shape(RB_SAMPLES_AXIS);
@@ -273,10 +294,9 @@ void define_stretcher_method_process(nb::class_<rb::RubberBandStretcher>& cls)
         }
 
         auto const& audio_per_channel = get_audio_ptr_per_channel(audio.data(), channels_num, samples_num);
-        stretcher.process(audio_per_channel.data(), samples_num, final);
+        stretcher.process(audio_per_channel.data(), samples_num, false);
       },
       "audio_data"_a,
-      "final"_a = false,
       nb::call_guard<nb::gil_scoped_release>());
 }
 
@@ -284,21 +304,46 @@ void define_stretcher_method_retrieve(nb::class_<rb::RubberBandStretcher>& cls)
 {
   cls.def(
       "retrieve",
-      [](rb::RubberBandStretcher& stretcher, size_t samples_num)
+      [](rb::RubberBandStretcher& stretcher, size_t const wanted_samples_num)
       {
-        size_t const channels_num = stretcher.getChannelCount();
-        samples_num = std::min(samples_num, (size_t)(std::max(0, stretcher.available())));  // available == -1 when done
-
-        DType_t* audio_data = new DType_t[channels_num * samples_num];
-        auto const& audio_per_channel = get_audio_ptr_per_channel(audio_data, channels_num, samples_num);
-
-        stretcher.retrieve(audio_per_channel.data(), samples_num);
+        auto [audio_data, samples_num] = retrieve_audio_data(stretcher, wanted_samples_num);
 
         nb::gil_scoped_acquire gil_acquired;
-        nb::capsule deleter(audio_data, [](void* p) noexcept { delete[] static_cast<DType_t*>(p); });
-        return NbAudioArrayRet_t(audio_data, AudioShape_t::size, create_audio_shape(channels_num, samples_num).data(), deleter);
+        return ndarray_from_audio_data(audio_data, stretcher.getChannelCount(), samples_num);
       },
       "samples_num"_a,
+      nb::call_guard<nb::gil_scoped_release>());
+  cls.def(
+      "retrieve_available",
+      [](rb::RubberBandStretcher& stretcher)
+      {
+        auto [audio_data, samples_num] = retrieve_available_audio_data(stretcher);
+
+        nb::gil_scoped_acquire gil_acquired;
+        return ndarray_from_audio_data(audio_data, stretcher.getChannelCount(), samples_num);
+      },
+      nb::call_guard<nb::gil_scoped_release>());
+}
+
+void define_stretcher_method_flush(nb::class_<rb::RubberBandStretcher>& cls)
+{
+  cls.def(
+      "flush",
+      [](rb::RubberBandStretcher& stretcher)
+      {
+        stretcher.process(nullptr, 0, true);
+
+        auto [audio_data, samples_num] = retrieve_available_audio_data(stretcher);
+        if (stretcher.available() != RB_IS_DONE__AVAILABLE_VALUE)
+        {
+          delete[] audio_data;
+          throw nb::type_error("Flush used with multithreaded stretcher!");
+        }
+        stretcher.reset();  // make it usable after the flush
+
+        nb::gil_scoped_acquire gil_acquired;
+        return ndarray_from_audio_data(audio_data, stretcher.getChannelCount(), samples_num);
+      },
       nb::call_guard<nb::gil_scoped_release>());
 }
 
@@ -320,6 +365,7 @@ void define_stretcher_class(nb::module_& m)
   define_stretcher_method_study(stretcher_class);
   define_stretcher_method_process(stretcher_class);
   define_stretcher_method_retrieve(stretcher_class);
+  define_stretcher_method_flush(stretcher_class);
   define_stretcher_simple_methods(stretcher_class);
 }
 

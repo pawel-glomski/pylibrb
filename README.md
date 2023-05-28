@@ -6,8 +6,12 @@ pylibrb (py-lib-rubberband) is a simple Python extension exposing [Rubber Band L
 Since this is not a wrapper around a command-line app (like [pyrubberband](https://github.com/bmcfee/pyrubberband)), both offline and real-time modes are available.
 
 Currently this extenstion exposes only a single class: `RubberBandStretcher`, which implements all the functionalities of the underlying C++ class. The interface is nearly identical to the original library, with a few changes to make it a bit more Pythonic by:
- - using `snake_case`
- - not using (magic) numbers to represent the state
+- using `snake_case` for functions, variables and properties, and `SNAKE_CASE` for constants
+- not using (magic) numbers to represent the state
+  - use `is_done()` to see if all the data has been processed and returned from the stretcher, instead of `available() == -1`
+  - use `stretcher.formant_scale = pylibrb.AUTO_FORMANT_SCALE` instead of `stretcher.formant_scale = 0`
+- not using `final` argument in `process()`
+  - use `flush()` to finish processing and get the remaining samples
 
 Throughout the library, audio is accepted and returned in the form of [NumPy](https://github.com/numpy/numpy) ndarrays.
 

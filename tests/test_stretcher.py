@@ -165,10 +165,71 @@ class TestRealtimeStretcher:
       observed_samples += stretcher.retrieve(stretcher.available()).shape[pylibrb.SAMPLES_AXIS]
 
     stretcher.time_ratio = time_ratio
-    for i in range(iters):
-      stretcher.process(audio_data, final=(i + 1) == iters)
+    for _ in range(iters):
+      stretcher.process(audio_data)
       expected_samples += audio_samples * stretcher.time_ratio
       observed_samples += stretcher.retrieve(stretcher.available()).shape[pylibrb.SAMPLES_AXIS]
 
+    observed_samples += stretcher.flush().shape[pylibrb.SAMPLES_AXIS]
+
     relative_error = abs(expected_samples - observed_samples) / expected_samples
     assert relative_error <= 0.05
+
+  def test_retrieve_available_should_return_available_samples(
+      self, realtime_stretcher: RubberBandStretcher):
+    stretcher = realtime_stretcher
+    audio_data = pylibrb.create_audio_array(stretcher.channels, stretcher.get_samples_required())
+
+    stretcher.process(audio_data)
+    available_samples = stretcher.available()
+
+    assert available_samples > 0
+    result = stretcher.retrieve_available()
+
+    assert result.shape[pylibrb.SAMPLES_AXIS] == available_samples
+    assert result.shape[pylibrb.CHANNELS_AXIS] == stretcher.channels
+
+    # since we just took all the available audio, there shouldn't be any left
+    assert stretcher.retrieve_available().size == 0
+
+  def test_flush_should_return_empty_array_when_stretcher_is_empty(
+      self, realtime_stretcher: RubberBandStretcher):
+    stretcher = realtime_stretcher
+
+    flushed_audio = stretcher.flush()
+
+    assert flushed_audio.size == 0
+
+  def test_flush_should_return_empty_array_when_stretcher_is_already_flushed(
+      self, realtime_stretcher: RubberBandStretcher):
+    stretcher = realtime_stretcher
+    audio_data = pylibrb.create_audio_array(stretcher.channels, stretcher.get_samples_required())
+    stretcher.process(audio_data)
+
+    stretcher.flush()
+    flushed_audio = stretcher.flush()
+
+    assert flushed_audio.size == 0
+
+  def test_flush_should_return_something_when_stretcher_is_not_empty(
+      self, realtime_stretcher: RubberBandStretcher):
+    stretcher = realtime_stretcher
+    audio_data = pylibrb.create_audio_array(stretcher.channels,
+                                            int(1.5 * stretcher.get_samples_required()))
+    stretcher.process(audio_data)
+
+    flushed_audio = stretcher.flush()
+
+    assert flushed_audio.size > 0
+
+  def test_flush_should_return_something_when_stretcher_is_not_empty_and_retrieve_was_called_before(
+      self, realtime_stretcher: RubberBandStretcher):
+    stretcher = realtime_stretcher
+    audio_data = pylibrb.create_audio_array(stretcher.channels,
+                                            int(1.5 * stretcher.get_samples_required()))
+    stretcher.process(audio_data)
+    stretcher.retrieve_available()
+
+    flushed_audio = stretcher.flush()
+
+    assert flushed_audio.size > 0

@@ -548,7 +548,7 @@ class RubberBandStretcher:
       `True` if the "final" block has been processed and already retrieved, `False` otherwise.
     '''
 
-  def process(self, audio: np.ndarray, final: bool) -> None:
+  def process(self, audio: np.ndarray) -> None:
     '''Provide a block of samples for processing.
     
     See also `get_samples_required()` and `set_max_process_size()`.
@@ -557,8 +557,6 @@ class RubberBandStretcher:
       audio:
         De-interleaved audio data with one float array per channel. Sample values are conventionally
         expected to be in the range -1.0f to +1.0f
-      final:
-        Is this the last block of input data.
     '''
 
   def reset(self) -> None:
@@ -569,17 +567,34 @@ class RubberBandStretcher:
     '''
 
   def retrieve(self, samples_num: int) -> np.ndarray:
-    '''Obtain some processed output data from the stretcher.
-    
-    Up to `samples_num` samples will be stored in each of the output arrays (one per channel for
-    de-interleaved audio data) pointed to by `output`.
+    '''Obtain some processed output from the stretcher.
     
     The number of samples available to be retrieved can be queried beforehand with a call to
     `available()`.
+
+    Args:
+      samples_num:
+        Wanted number of samples to obtain.
     
     Returns:
       An array with the requested number of samples, or less if the requested amount was greater
-      than the number of samples currently available (can return an empty array).
+      than the number of samples currently available (returns an empty array when nothing is
+      available).
+    '''
+
+  def retrieve_available(self) -> np.ndarray:
+    '''Obtains the currently available output from the stretcher.
+    
+    Returns:
+      An array the currently available samples (returns an empty array when nothing is available).
+    '''
+
+  def flush(self) -> np.ndarray:
+    '''Flushes the stretcher and returns the remaining samples. Stretcher resets on this operation
+    (as if `reset()` was called).
+
+    Returns:
+      An array with the remaining samples. Returns an empty array when nothing is available.
     '''
 
   def set_detector_options(self, options: int) -> None:
@@ -747,7 +762,7 @@ class RubberBandStretcher:
         New `Option.TRANSIENTS` settings.
     '''
 
-  def study(self, audio: np.ndarray, final: bool) -> None:
+  def study(self, audio: np.ndarray, final: bool = False) -> None:
     '''Provide a block of `samples` samples for the stretcher to study and calculate a stretch
     profile from.
 
@@ -760,8 +775,8 @@ class RubberBandStretcher:
       audio:
         De-interleaved audio data with one float array per channel. Sample values are conventionally
         expected to be in the range -1.0f to +1.0f
-      final:
-        Is this the last block of input data.
+      final (optional):
+        Is this the last block of input data. Defaults to `False`.
     '''
 
 
