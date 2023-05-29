@@ -331,7 +331,11 @@ void define_stretcher_method_flush(nb::class_<rb::RubberBandStretcher>& cls)
       "flush",
       [](rb::RubberBandStretcher& stretcher)
       {
-        stretcher.process(nullptr, 0, true);
+        std::array<DType_t, MAX_CHANNELS_NUM> dummy_sample;
+        std::fill_n(dummy_sample.data(), MAX_CHANNELS_NUM, DType_t(0));
+
+        auto const& audio_per_channel = get_audio_ptr_per_channel(dummy_sample.data(), stretcher.getChannelCount(), 1);
+        stretcher.process(audio_per_channel.data(), 1, true);
 
         auto [audio_data, samples_num] = retrieve_available_audio_data(stretcher);
         if (stretcher.available() != RB_IS_DONE__AVAILABLE_VALUE)

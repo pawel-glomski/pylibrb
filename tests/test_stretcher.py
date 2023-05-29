@@ -8,7 +8,7 @@ from pylibrb import RubberBandStretcher, Option
 def realtime_stretcher():
   yield RubberBandStretcher(sample_rate=16000,
                             channels=1,
-                            options=Option.PROCESS_REALTIME | Option.ENGINE_FINER)
+                            options=Option.PROCESS_REALTIME | Option.ENGINE_FASTER)
 
 
 class TestStretcherInit:
@@ -150,7 +150,7 @@ class TestRealtimeStretcher:
     stretcher = realtime_stretcher
 
     audio_data = pylibrb.create_audio_array(stretcher.channels,
-                                            stretcher.get_samples_required(),
+                                            88000,
                                             init_value=1)
     audio_samples = audio_data.shape[pylibrb.SAMPLES_AXIS]
 
