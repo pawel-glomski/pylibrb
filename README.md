@@ -1,9 +1,10 @@
 # pylibrb
 [![tests](https://github.com/pawel-glomski/pylibrb/actions/workflows/test.yml/badge.svg)](https://github.com/pawel-glomski/pylibrb/actions/workflows/test.yml)
+[![PyPI version](https://img.shields.io/pypi/v/pylibrb)](https://pypi.org/project/pylibrb/)
 
 pylibrb (py-lib-rubberband) is a simple Python extension exposing [Rubber Band Library](https://breakfastquay.com/rubberband/) using [nanobind](https://github.com/wjakob/nanobind) bindings.
 
-Since this is not a wrapper around a command-line app (like [pyrubberband](https://github.com/bmcfee/pyrubberband)), both offline and real-time modes are available.
+Since this is not a wrapper around a command-line tool (like [pyrubberband](https://github.com/bmcfee/pyrubberband)), both offline and real-time modes are available.
 
 Currently this extenstion exposes only a single class: `RubberBandStretcher`, which implements all the functionalities of the underlying C++ class. The interface is nearly identical to the original library, with a few changes to make it a bit more Pythonic by:
 - using `snake_case` for functions, variables and properties, and `SNAKE_CASE` for constants
