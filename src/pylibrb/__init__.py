@@ -16,14 +16,31 @@ def reorder_to_rb(audio: np.ndarray, channels_axis: int) -> np.ndarray:
   Args:
       rb_audio:
         Audio to be reordered.
-      wanted_channels_axis: 
+      channels_axis: 
         Which axis is used for channels.
 
   Returns:
       np.ndarray:
         View of the provided audio with the pylibrb-compatible layout.
   """
-  assert channels_axis in [0, 1]
+  if channels_axis not in [0, 1]:
+    # TODO: when adding support for batched audio:
+    # - add `samples_axis` argument
+    # audio = np.moveaxis(audio, [channel_axis, samples_axis], [-1-CHANNELS_AXIS, -1-SAMPLES_AXIS])
+    # audio = audio.reshape((-1, *audio.shape[-2:]))
+    #
+    # then `reorder_from_rb` would have to revert this operation:
+    # - add `wanted_shape` argument, remove `wanted_channels_axis`
+    # wanted_channels_axis = wanted_shape.index('c')
+    # wanted_samples_axis = wanted_shape.index('s')
+    # current_shape = list(wanted_shape + rb_audio.shape[-2:])
+    # del current_shape[wanted_channels_axis]
+    # del current_shape[wanted_samples_axis]
+    # rb_audio.reshape(current_shape)
+    # rb_audio = np.moveaxis(rb_audio, [-1-CHANNELS_AXIS, -1-SAMPLES_AXIS],
+    #                                  [wanted_channels_axis, wanted_samples_axis])
+    raise ValueError(f'{channels_axis=} is not supported, audio must always have 2 dimensions: '
+                     '{channels, samples}')
   if channels_axis == CHANNELS_AXIS:
     return audio
   return audio.T

@@ -1,3 +1,5 @@
+import pytest
+
 import numpy as np
 
 import pylibrb
@@ -17,6 +19,13 @@ def test_create_audio_array_should_create_array_with_correct_value():
   assert np.all(audio == 321)
 
 
+def test_reorder_to_rb_should_raise_value_error_when_bad_channels_axis():
+  audio = create_audio_array(2, 128)
+
+  with pytest.raises(ValueError):
+    reorder_to_rb(audio, channels_axis=2)
+
+
 def test_reorder_to_rb_should_do_nothing_when_audio_with_correct_layout():
   audio = create_audio_array(2, 128)
 
@@ -32,6 +41,13 @@ def test_reorder_to_rb_should_reorder_audio_array_when_audio_with_wrong_layout()
   audio_reordered = reorder_to_rb(audio.T, channels_axis=pylibrb.SAMPLES_AXIS)
 
   assert audio_reordered.shape == audio.shape
+
+
+def test_reorder_from_rb_should_raise_value_error_when_bad_channels_axis():
+  audio = create_audio_array(2, 128)
+
+  with pytest.raises(ValueError):
+    reorder_from_rb(audio, wanted_channels_axis=2)
 
 
 def test_reorder_from_rb_should_do_nothing_when_audio_with_correct_layout():
