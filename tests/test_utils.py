@@ -63,7 +63,7 @@ def test_reorder_from_rb_should_raise_value_error_when_missing_None_in_wanted_sh
 def test_reorder_from_rb_should_do_nothing_when_audio_with_correct_layout():
   rb_audio = create_audio_array(2, 128)
 
-  wanted_shape = [2, 2]
+  wanted_shape = [-1, -1]
   wanted_shape[pylibrb.SAMPLES_AXIS] = None
   audio_reordered = reorder_from_rb(rb_audio, wanted_shape=wanted_shape)
 
