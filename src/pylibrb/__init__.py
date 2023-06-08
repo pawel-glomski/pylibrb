@@ -6,68 +6,49 @@ DType = np.dtype(DTYPE_NAME)
 '''The data type used internally for audio.'''
 
 
-def reorder_to_rb(audio: np.ndarray, channels_axis: int) -> np.ndarray:
-  """If needed, changes the (logical) layout of audio to make it pylibrb-compatible.
-  
-  Generally this only returns a view of the provided audio (only the logical layout may be changed)
-  thus the actual memory order is unchanged. When an array is provided to `pylibrb`, it makes a copy
-  if the memory order is not C-contiguous.
+def reorder_to_rb(audio: np.ndarray, samples_axis: int) -> np.ndarray:
+  """If needed, changes the (logical) layout of audio to make it `pylibrb-compatible`.
+
+  This only returns a view of the provided array (only the logical layout may be changed), thus the
+  actual memory order won't be affected. `pylibrb` will make a copy if the input of `process()` or
+  `study()` is not C-contiguous.
 
   Args:
       rb_audio:
         Audio to be reordered.
-      channels_axis: 
-        Which axis is used for channels.
+      samples_axis: 
+        Which axis is used for samples. All other axes will be treated as separate channels.
 
   Returns:
       np.ndarray:
-        View of the provided audio with the pylibrb-compatible layout.
+        View of the provided audio with the `pylibrb-compatible` layout.
   """
-  if channels_axis not in [0, 1]:
-    # TODO: when adding support for batched audio:
-    # - add `samples_axis` argument
-    # audio = np.moveaxis(audio, [channel_axis, samples_axis], [-1-CHANNELS_AXIS, -1-SAMPLES_AXIS])
-    # audio = audio.reshape((-1, *audio.shape[-2:]))
-    #
-    # then `reorder_from_rb` would have to revert this operation:
-    # - add `wanted_shape` argument, remove `wanted_channels_axis`
-    # wanted_channels_axis = wanted_shape.index('c')
-    # wanted_samples_axis = wanted_shape.index('s')
-    # current_shape = list(wanted_shape + rb_audio.shape[-2:])
-    # del current_shape[wanted_channels_axis]
-    # del current_shape[wanted_samples_axis]
-    # rb_audio.reshape(current_shape)
-    # rb_audio = np.moveaxis(rb_audio, [-1-CHANNELS_AXIS, -1-SAMPLES_AXIS],
-    #                                  [wanted_channels_axis, wanted_samples_axis])
-    raise ValueError(f'{channels_axis=} is not supported, audio must always have 2 dimensions: '
-                     '{channels, samples}')
-  if channels_axis == CHANNELS_AXIS:
-    return audio
-  return audio.T
+  output_shape = [-1, -1]
+  output_shape[SAMPLES_AXIS] = audio.shape[samples_axis]
+  # squeezes all axes into a single "channel" axis, except for the `samples_axis` axis
+  return np.moveaxis(audio, [samples_axis], [-SAMPLES_AXIS]).reshape(output_shape)
 
 
-def reorder_from_rb(rb_audio: np.ndarray, wanted_channels_axis: int) -> np.ndarray:
-  """If needed, changes the (logical) layout of Rubber-Band-compatible audio to match the specified
+def reorder_from_rb(rb_audio: np.ndarray, wanted_shape: list[int]) -> np.ndarray:
+  """If needed, changes the (logical) layout of pylibrb-compatible audio to match the specified
   layout.
-  
-  For an array with `x` channels and `y` samples, the returned array will have the shape:
-   - `(x, y)` for `wanted_channels_axis=0`
-   - `(y, x)` for `wanted_channels_axis=1`
 
-  Generally this only returns a view of the provided audio (only the logical layout may be changed)
-  thus the actual memory order is unchanged.
+  This only returns a view of the provided audio (only the logical layout may be changed) thus the
+  actual memory order will be unchanged.
 
   Args:
       rb_audio:
         pylibrb-compatible audio to be reordered.
-      wanted_channels_axis: 
-        Which axis should be used for channels.
+      wanted_shape: 
+        What should be the shape of the output. This list should contain at least one `None`, which
+        will specify the axis for samples. The shape can contain one `-1` value.
 
   Returns:
       np.ndarray:
         View of the provided audio with the specified layout.
   """
-  return reorder_to_rb(rb_audio, wanted_channels_axis)
-
-
-del np
+  wanted_samples_axis = wanted_shape.index(None)
+  wanted_shape = wanted_shape[:wanted_samples_axis] + wanted_shape[wanted_samples_axis + 1:]
+  current_shape = [rb_audio.shape[SAMPLES_AXIS]]
+  current_shape[CHANNELS_AXIS:CHANNELS_AXIS] = wanted_shape
+  return np.moveaxis(rb_audio.reshape(current_shape), [-SAMPLES_AXIS], [wanted_samples_axis])
