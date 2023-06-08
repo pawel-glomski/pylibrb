@@ -30,7 +30,7 @@ constexpr size_t RB_SAMPLES_AXIS = 1;
 using DType_t = float;
 constexpr char const* DTYPE_NAME = get_numpy_format_name<DType_t>().data();
 
-using NbAudioArrayArg_t = nb::ndarray<DType_t, AudioShape_t, nb::c_contig, nb::device::cpu>;
+using NbAudioArrayArg_t = nb::ndarray<DType_t const, AudioShape_t, nb::c_contig, nb::device::cpu>;
 using NbAudioArrayRet_t = nb::ndarray<nb::numpy, DType_t, AudioShape_t, nb::c_contig, nb::device::cpu>;
 
 using Option = rb::RubberBandStretcher::Option;
@@ -38,9 +38,12 @@ using OptionsPreset = rb::RubberBandStretcher::PresetOption;
 
 /* helpers ****************************************************************************************/
 
-std::array<DType_t*, MAX_CHANNELS_NUM> get_audio_ptr_per_channel(DType_t* const audio_data, size_t channels_num, size_t const samples_num)
+template <typename DType>
+std::array<DType*, MAX_CHANNELS_NUM> get_audio_ptr_per_channel(DType* const audio_data, size_t channels_num, size_t const samples_num)
 {
-  std::array<DType_t*, MAX_CHANNELS_NUM> audio_rows_per_channel;
+  static_assert(std::is_same_v<std::remove_const_t<DType>, DType_t>);
+
+  std::array<DType*, MAX_CHANNELS_NUM> audio_rows_per_channel;
   channels_num = std::min(MAX_CHANNELS_NUM, channels_num);
   for (size_t channel_idx = 0; channel_idx < channels_num; ++channel_idx)
   {
@@ -93,7 +96,7 @@ void set_stretcher_time_ratio(rb::RubberBandStretcher& stretcher, double const t
 {
   if (time_ratio <= 0)
   {
-    throw nb::value_error(fmt::format("`time_ratio={}` is not supported. Time ratio must be greater than zero.", time_ratio));
+    throw nb::value_error(fmt::format("`time_ratio={}` is not supported. Time ratio must be greater than zero.", time_ratio).c_str());
   }
   stretcher.setTimeRatio(time_ratio);
 }
@@ -102,7 +105,7 @@ void set_stretcher_pitch_scale(rb::RubberBandStretcher& stretcher, double const 
 {
   if (pitch_scale <= 0)
   {
-    throw nb::value_error(fmt::format("`pitch_scale={}` is not supported. Time ratio must be greater than zero.", pitch_scale));
+    throw nb::value_error(fmt::format("`pitch_scale={}` is not supported. Time ratio must be greater than zero.", pitch_scale).c_str());
   }
   stretcher.setPitchScale(pitch_scale);
 }
@@ -178,13 +181,13 @@ void define_stretcher__init__(nb::class_<rb::RubberBandStretcher>& cls)
           throw nb::value_error(fmt::format("`sample_rate={}` is out of range. RubberBand supports sample rates in the range: ({}, {}).",
                                             sample_rate,
                                             RB_MIN_SAMPLE_RATE,
-                                            RB_MAX_SAMPLE_RATE));
+                                            RB_MAX_SAMPLE_RATE)
+                                    .c_str());
         }
         if (channels == 0 || channels > MAX_CHANNELS_NUM)
         {
-          throw nb::value_error(fmt::format("`channels={}` is not supported. Audio may have at least 1 and at most {} channels.",
-                                            channels,
-                                            MAX_CHANNELS_NUM));
+          throw nb::value_error(
+              fmt::format("`channels={}` is not supported. Audio may have at least 1 and at most {} channels.", channels, MAX_CHANNELS_NUM).c_str());
         }
 
         new (ptr) rb::RubberBandStretcher(sample_rate, channels, options, initial_time_ratio, initial_pitch_scale);
@@ -215,7 +218,8 @@ void define_stretcher_read_write_properties(nb::class_<rb::RubberBandStretcher>&
                   {
                     if (formant_scale <= 0 && formant_scale != RB_AUTO_FORMANT_SCALE)
                     {
-                      throw nb::value_error(fmt::format("`formant_scale={}` is not supported. Time ratio must be greater than zero.", formant_scale));
+                      throw nb::value_error(
+                          fmt::format("`formant_scale={}` is not supported. Time ratio must be greater than zero.", formant_scale).c_str());
                     }
                     stretcher.setFormantScale(formant_scale);
                   });
