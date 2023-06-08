@@ -279,7 +279,7 @@ void define_stretcher_method_study(nb::class_<rb::RubberBandStretcher>& cls)
         auto const& audio_per_channel = get_audio_ptr_per_channel(audio.data(), channels_num, samples_num);
         stretcher.study(audio_per_channel.data(), samples_num, final);
       },
-      "audio_data"_a,
+      "audio"_a,
       "final"_a = false,
       nb::call_guard<nb::gil_scoped_release>());
 }
@@ -300,7 +300,7 @@ void define_stretcher_method_process(nb::class_<rb::RubberBandStretcher>& cls)
         auto const& audio_per_channel = get_audio_ptr_per_channel(audio.data(), channels_num, samples_num);
         stretcher.process(audio_per_channel.data(), samples_num, final);
       },
-      "audio_data"_a,
+      "audio"_a,
       "final"_a = false,
       nb::call_guard<nb::gil_scoped_release>());
 }
