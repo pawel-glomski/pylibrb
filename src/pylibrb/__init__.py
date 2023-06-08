@@ -1,3 +1,5 @@
+from typing import List, Union
+
 import numpy as np
 
 from .pylibrb_ext import *
@@ -29,7 +31,7 @@ def reorder_to_rb(audio: np.ndarray, samples_axis: int) -> np.ndarray:
   return np.moveaxis(audio, [samples_axis], [-SAMPLES_AXIS]).reshape(output_shape)
 
 
-def reorder_from_rb(rb_audio: np.ndarray, wanted_shape: list[int]) -> np.ndarray:
+def reorder_from_rb(rb_audio: np.ndarray, wanted_shape: List[Union[int, None]]) -> np.ndarray:
   """If needed, changes the (logical) layout of pylibrb-compatible audio to match the specified
   layout.
 
@@ -41,7 +43,7 @@ def reorder_from_rb(rb_audio: np.ndarray, wanted_shape: list[int]) -> np.ndarray
         pylibrb-compatible audio to be reordered.
       wanted_shape: 
         What should be the shape of the output. This list should contain at least one `None`, which
-        will specify the axis for samples. The shape can contain one `-1` value.
+        will specify the axis for samples. The shape can contain a single `-1` value.
 
   Returns:
       np.ndarray:
