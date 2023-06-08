@@ -74,7 +74,7 @@ class TestStretcherInit:
     assert stretcher.time_ratio == 0.5
     assert stretcher.pitch_scale == 0.5
     assert stretcher.available() == 0
-    assert stretcher.is_done() == False
+    assert stretcher.is_done() is False
 
 
 class TestRealtimeStretcher:
@@ -171,6 +171,7 @@ class TestRealtimeStretcher:
       observed_samples += stretcher.retrieve(stretcher.available()).shape[pylibrb.SAMPLES_AXIS]
 
     relative_error = abs(expected_samples - observed_samples) / expected_samples
+    assert stretcher.is_done()
     assert relative_error <= 0.05
 
   def test_retrieve_available_should_return_available_samples(
