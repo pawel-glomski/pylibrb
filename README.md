@@ -11,8 +11,6 @@ Currently this extenstion exposes only a single class: `RubberBandStretcher`, wh
 - not using (magic) numbers to represent the state
   - use `is_done()` to see if all the data has been processed and returned from the stretcher, instead of `available() == -1`
   - use `stretcher.formant_scale = pylibrb.AUTO_FORMANT_SCALE` instead of `stretcher.formant_scale = 0`
-- not using `final` argument in `process()`
-  - use `flush()` to finish processing and get the remaining samples
 
 Throughout the library, audio is accepted and returned in the form of [NumPy](https://github.com/numpy/numpy) ndarrays.
 

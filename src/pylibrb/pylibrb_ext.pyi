@@ -548,7 +548,7 @@ class RubberBandStretcher:
       `True` if the "final" block has been processed and already retrieved, `False` otherwise.
     '''
 
-  def process(self, audio: np.ndarray) -> None:
+  def process(self, audio: np.ndarray, final: bool = False) -> None:
     '''Provide a block of samples for processing.
     
     See also `get_samples_required()` and `set_max_process_size()`.
@@ -557,6 +557,8 @@ class RubberBandStretcher:
       audio:
         De-interleaved audio data with one float array per channel. Sample values are conventionally
         expected to be in the range -1.0f to +1.0f
+      final:
+        Is this the last audio block to process.
     '''
 
   def reset(self) -> None:
@@ -587,14 +589,6 @@ class RubberBandStretcher:
     
     Returns:
       An array the currently available samples (returns an empty array when nothing is available).
-    '''
-
-  def flush(self) -> np.ndarray:
-    '''Flushes the stretcher and returns the remaining samples. Stretcher resets on this operation
-    (as if `reset()` was called).
-
-    Returns:
-      An array with the remaining samples. Returns an empty array when nothing is available.
     '''
 
   def set_detector_options(self, options: int) -> None:
