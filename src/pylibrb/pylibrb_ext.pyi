@@ -717,7 +717,7 @@ class RubberBandStretcher:
       `get_process_size_limit()` call.
 
     Raises:
-      ValueError: If `samples` is exceeds the limit.
+      ValueError: If `samples` exceeds the limit.
     '''
 
   def get_process_size_limit() -> int:
