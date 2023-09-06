@@ -6,9 +6,11 @@ from pylibrb import RubberBandStretcher, Option
 
 @pytest.fixture
 def realtime_stretcher():
-  yield RubberBandStretcher(sample_rate=16000,
-                            channels=1,
-                            options=Option.PROCESS_REALTIME | Option.ENGINE_FASTER)
+  yield RubberBandStretcher(
+      sample_rate=16000,
+      channels=1,
+      options=Option.PROCESS_REALTIME | Option.ENGINE_FINER | Option.WINDOW_SHORT,
+  )
 
 
 class TestStretcherInit:

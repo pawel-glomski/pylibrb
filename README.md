@@ -33,7 +33,7 @@ while not stretcher.available():
   stretcher.process(audio_in)
 
 # retrieve the available samples
-audio_out = stretcher.retrieve(stretcher.available())
+audio_out = stretcher.retrieve_available()
 
 ```
 
