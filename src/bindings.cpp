@@ -245,7 +245,21 @@ void define_stretcher_setters_only(nb::class_<rb::RubberBandStretcher>& cls)
   cls.def("set_formant_options", &rb::RubberBandStretcher::setFormantOption, "options"_a);
   cls.def("set_pitch_options", &rb::RubberBandStretcher::setPitchOption, "options"_a);
   cls.def("set_expected_input_duration", &rb::RubberBandStretcher::setExpectedInputDuration, "samples"_a);
-  cls.def("set_max_process_size", &rb::RubberBandStretcher::setMaxProcessSize, "samples"_a);
+  cls.def(
+      "set_max_process_size",
+      [](rb::RubberBandStretcher& stretcher, size_t const samples)
+      {
+        if (samples > stretcher.getProcessSizeLimit())
+        {
+          throw nb::value_error(
+              fmt::format("The specified number of samples ({}) exceeds the limit ({}), see `get_process_size_limit()` for more details",
+                          samples,
+                          stretcher.getProcessSizeLimit())
+                  .c_str());
+        }
+        stretcher.setMaxProcessSize(samples);
+      },
+      "samples"_a);
   cls.def("set_keyframe_map", &rb::RubberBandStretcher::setKeyFrameMap, "mapping"_a);
   cls.def("set_logging_level", &rb::RubberBandStretcher::setDebugLevel, "level"_a);
 }
@@ -267,6 +281,7 @@ void define_stretcher_getters_only(nb::class_<rb::RubberBandStretcher>& cls)
   cls.def("get_output_increment", &rb::RubberBandStretcher::getOutputIncrements);
   cls.def("get_phase_reset_curve", &rb::RubberBandStretcher::getPhaseResetCurve);
   cls.def("get_exact_time_points", &rb::RubberBandStretcher::getExactTimePoints);
+  cls.def("get_process_size_limit", &rb::RubberBandStretcher::getProcessSizeLimit);
 }
 
 void define_stretcher_method_study(nb::class_<rb::RubberBandStretcher>& cls)

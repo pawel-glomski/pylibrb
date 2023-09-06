@@ -713,6 +713,22 @@ class RubberBandStretcher:
 
     Args:
       samples: The maximum number of samples that will be ever passed in a single `process()` call.
+      There is an internal upper limit for this value, which can be queried with
+      `get_process_size_limit()` call.
+
+    Raises:
+      ValueError: If `samples` is exceeds the limit.
+    '''
+
+  def get_process_size_limit() -> int:
+    '''Obtain the overall maximum supported process buffer size in samples.
+    
+    This is the upper limit for values passed to `set_max_process_size()`. This value is fixed
+    across instances and configurations. As of Rubber Band v3.3 it is always 524288 (or 2^19), but
+    in principle it may change in future releases.
+    
+    Returns:
+      The supported process buffer size in samples.
     '''
 
   def set_phase_options(self, options: int) -> None:

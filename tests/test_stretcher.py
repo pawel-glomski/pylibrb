@@ -81,6 +81,18 @@ class TestStretcherInit:
 
 class TestRealtimeStretcher:
 
+  def test_set_max_process_size_should_raise_value_error_when_value_exceeds_limit(
+      self, realtime_stretcher: RubberBandStretcher):
+    stretcher = realtime_stretcher
+    with pytest.raises(ValueError):
+        stretcher.set_max_process_size(stretcher.get_process_size_limit()+1)
+
+  def test_set_max_process_size_should_succeed_when_valid_value(
+      self, realtime_stretcher: RubberBandStretcher):
+    stretcher = realtime_stretcher
+    stretcher.set_max_process_size(stretcher.get_process_size_limit())
+
+
   def test_process_should_raise_value_error_when_incorrect_audio_layout(
       self, realtime_stretcher: RubberBandStretcher):
     stretcher = realtime_stretcher
