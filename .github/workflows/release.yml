@@ -8,35 +8,12 @@ on:
 permissions:
   contents: read
 
-env:
-  # Python 3.12+ is handled using the stable ABI, no need to build later versions
-  CIBW_PROJECT_REQUIRES_PYTHON: ">=3.8, <=3.12"
-  # Only build for PyPy 3.9
-  CIBW_SKIP: "pp37* pp38*"
-  # Target 64 bit architectures (x86_64, and arm64 on macOS)
-  CIBW_ARCHS_WINDOWS: auto64
-  CIBW_ARCHS_LINUX: auto64
-  CIBW_ARCHS_MACOS: x86_64 arm64
-  # Target older versions of macOS and Linux for good compatibility
-  CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=10.14
-  CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
-  CIBW_MANYLINUX_AARCH64_IMAGE: manylinux2014
-  # Necessary to see build output from the actual compilation
-  CIBW_BUILD_VERBOSITY: 1
-  # Temporary: use pre-release Python 3.12 for stable API builds
-  CIBW_PRERELEASE_PYTHONS: True
-  # GitHub Actions doesn't have macOS/arm64 runners, skip test on this platform
-  CIBW_TEST_SKIP: "*-macosx_arm64"
-  # Run pytest to ensure that the package was correctly built
-  CIBW_TEST_COMMAND: pytest {project}/tests
-  CIBW_TEST_REQUIRES: pytest
-
 jobs:
   build_sdist:
     name: Build SDist
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
 
@@ -50,7 +27,6 @@ jobs:
       with:
         path: dist/*.tar.gz
 
-
   build_wheels:
     name: Wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -59,12 +35,28 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
 
+    env:
+      PYLIBRB_VCPKG_ROOT: ${{ github.workspace }}/pylibrb_vcpkg
+
     steps:
-    - uses: actions/checkout@v3
+    - name: Set min macOS version
+      if: runner.os == 'macOS'
+      run: |
+        echo "MACOS_DEPLOYMENT_TARGET=10.14" >> $GITHUB_ENV
+
+    - uses: actions/checkout@v4
       with:
         submodules: true
 
-    - uses: pypa/cibuildwheel@v2.12.3
+      # vcpkg
+      - name: Setup vcpkg (it does not install any package yet)
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgDirectory: '${{ env.PYLIBRB_VCPKG_ROOT }}'
+
+    - uses: pypa/cibuildwheel@v2.16.2
+      env:
+        CIBW_ARCHS_MACOS: x86_64 arm64 # Cross-compile on macOS
 
     - name: Verify clean directory
       run: git diff --exit-code
@@ -81,8 +73,7 @@ jobs:
     environment: release
     runs-on: ubuntu-latest
     permissions:
-      # IMPORTANT: this permission is mandatory for trusted publishing
-      id-token: write
+      id-token: write # mandatory for trusted publishing on PyPI
 
     steps:
     - uses: actions/setup-python@v4

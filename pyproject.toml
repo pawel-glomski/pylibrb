@@ -1,11 +1,51 @@
-[build-system]
-requires = [
-    "setuptools>=42",
-    "wheel",
-    "scikit-build>=0.16.7",
-    "cmake>=3.18",
-    "nanobind>=1.5.2",
-    "ninja; platform_system!='Windows'",
+[project]
+name = "pylibrb"
+version = "0.1.0"
+description = "Python bindings for the RubberBand library"
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [{ name = "Paweł Głomski", email = "pglomski.dev@gmail.com" }]
+license.text = "GPLv2"
+classifiers = [
+    "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
 ]
 
-build-backend = "setuptools.build_meta"
+[project.urls]
+Homepage = "https://github.com/pawel-glomski/pylibrb"
+
+# Build system stuff
+
+[build-system]
+requires = ["scikit-build-core >=0.6", "nanobind >=1.5.2"]
+build-backend = "scikit_build_core.build"
+
+[tool.scikit-build]
+cmake.build-type = "Release"
+
+# set the environment variable instead: CMAKE_TOOLCHAIN_FILE=...
+# cmake.args = [
+#     "-DCMAKE_TOOLCHAIN_FILE=./pylibrb_vcpkg/scripts/buildsystems/vcpkg.cmake",
+# ]
+
+# Setuptools-style build caching in a local directory
+build-dir = "build/{wheel_tag}"
+
+# Build stable ABI wheels for CPython 3.12+
+wheel.py-api = "cp312"
+
+sdist.exclude = ["tests/", "pylibrb_vcpkg/"]
+
+
+[tool.cibuildwheel]
+# Necessary to see build output from the actual compilation
+build-verbosity = 1
+
+# Run pytest to ensure that the package was correctly built
+test-command = "pytest tests"
+test-requires = "pytest"
+
+# Needed for full C++17 support
+[tool.cibuildwheel.macos.environment]
+MACOSX_DEPLOYMENT_TARGET = "10.14"

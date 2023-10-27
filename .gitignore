@@ -3,3 +3,4 @@
 _skbuild/
 build/
 __pycache__
+vcpkg_installed/
