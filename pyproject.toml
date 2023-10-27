@@ -2,15 +2,20 @@
 name = "pylibrb"
 version = "0.1.0"
 description = "Python bindings for the RubberBand library"
-readme = "README.md"
-requires-python = ">=3.8"
+
 authors = [{ name = "Paweł Głomski", email = "pglomski.dev@gmail.com" }]
+
+requires-python = ">=3.8"
+dependencies = ['numpy']
+
+readme = "README.md"
 license.text = "GPLv2"
 classifiers = [
     "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
     "Intended Audience :: Developers",
     "Programming Language :: Python :: 3",
 ]
+
 
 [project.urls]
 Homepage = "https://github.com/pawel-glomski/pylibrb"
