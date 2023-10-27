@@ -5,7 +5,7 @@ description = "Python bindings for the RubberBand library"
 
 authors = [{ name = "Paweł Głomski", email = "pglomski.dev@gmail.com" }]
 
-requires-python = ">=3.8"
+requires-python = ">=3.8, <3.12"
 dependencies = ['numpy']
 
 readme = "README.md"
@@ -27,6 +27,7 @@ requires = ["scikit-build-core >=0.6", "nanobind >=1.5.2"]
 build-backend = "scikit_build_core.build"
 
 [tool.scikit-build]
+wheel.packages = ["src/pylibrb"]
 cmake.build-type = "Release"
 
 # set the environment variable instead: CMAKE_TOOLCHAIN_FILE=...

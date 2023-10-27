@@ -5,6 +5,9 @@ find_package(fmt CONFIG REQUIRED)
 find_package(PkgConfig)
 pkg_check_modules(rubberband REQUIRED IMPORTED_TARGET rubberband)
 
+message(STATUS "Rubberband's LIBRARY_DIRS: ${rubberband_LIBRARY_DIRS}")
+message(STATUS "Rubberband's LIBRARIES: ${rubberband_LIBRARIES}")
+
 ####################################################################################################
 # bindings
 
