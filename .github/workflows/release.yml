@@ -39,10 +39,14 @@ jobs:
       PYLIBRB_VCPKG_ROOT: ${{ github.workspace }}/pylibrb_vcpkg
 
     steps:
-    - name: Set min macOS version
+    - name: macOS stuff
       if: runner.os == 'macOS'
+      # - set minimal macOS version
+      # - install pkg-config (we cannot use `pkgconf` tool because of cross-compilaton - vcpkg
+      #   builds it for ARM, while it should be the runner's architecture (x86-64))
       run: |
         echo "MACOS_DEPLOYMENT_TARGET=10.14" >> $GITHUB_ENV
+        brew install pkg-config
 
     - uses: actions/checkout@v4
       with:
@@ -57,6 +61,7 @@ jobs:
     - uses: pypa/cibuildwheel@v2.16.2
       env:
         CIBW_ARCHS_MACOS: x86_64 arm64 # Cross-compile on macOS
+        CIBW_SKIP: "pp37* pp38*"
         CMAKE_TOOLCHAIN_FILE: ${{ env.PYLIBRB_VCPKG_ROOT }}/scripts/buildsystems/vcpkg.cmake
 
     - name: Verify clean directory

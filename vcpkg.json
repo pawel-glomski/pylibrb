@@ -3,6 +3,9 @@
     "dependencies": [
         "rubberband",
         "fmt",
-        "pkgconf"
+        {
+            "name": "pkgconf",
+            "platform": "!osx"
+        }
     ]
 }
