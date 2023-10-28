@@ -50,7 +50,7 @@ sdist.exclude = ["tests/", "pylibrb_vcpkg/"]
 build-verbosity = 1
 
 # Run pytest to ensure that the package was correctly built
-test-command = "pytest tests"
+test-command = "pytest {project}/tests"
 test-requires = "pytest"
 
 # Needed for full C++17 support
