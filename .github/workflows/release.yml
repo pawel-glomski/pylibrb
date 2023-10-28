@@ -60,9 +60,7 @@ jobs:
 
     - uses: pypa/cibuildwheel@v2.16.2
       env:
-        CIBW_ARCHS_MACOS: x86_64 arm64 # Cross-compile on macOS
-        CIBW_SKIP: "pp37* pp38*"
-        CMAKE_TOOLCHAIN_FILE: ${{ env.PYLIBRB_VCPKG_ROOT }}/scripts/buildsystems/vcpkg.cmake
+        CIBW_ENVIRONMENT: CMAKE_TOOLCHAIN_FILE="${{ env.PYLIBRB_VCPKG_ROOT }}/scripts/buildsystems/vcpkg.cmake"
 
     - name: Verify clean directory
       run: git diff --exit-code

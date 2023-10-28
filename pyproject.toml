@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Python bindings for the RubberBand library"
 
 authors = [{ name = "Paweł Głomski", email = "pglomski.dev@gmail.com" }]
+urls.Homepage = "https://github.com/pawel-glomski/pylibrb"
 
 requires-python = ">=3.8, <3.12"
 dependencies = ['numpy']
@@ -17,9 +18,6 @@ classifiers = [
 ]
 
 
-[project.urls]
-Homepage = "https://github.com/pawel-glomski/pylibrb"
-
 # Build system stuff
 
 [build-system]
@@ -32,8 +30,8 @@ cmake.build-type = "Release"
 # CMAKE_TOOLCHAIN_FILE should be set by the user
 # or libraries should be discoverable by `pkg-config` and `find_package()`
 cmake.args = [
-    # "-DCMAKE_TOOLCHAIN_FILE=./pylibrb_vcpkg/scripts/buildsystems/vcpkg.cmake",
-    "-DCMAKE_BUILD_TYPE=Release", # this MUST match cmake.build-type
+    "-DCMAKE_TOOLCHAIN_FILE=./pylibrb_vcpkg/scripts/buildsystems/vcpkg.cmake",
+    "-DCMAKE_BUILD_TYPE=Release",                                              # this MUST match cmake.build-type
 ]
 
 # Setuptools-style build caching in a local directory
@@ -46,13 +44,11 @@ sdist.exclude = ["tests/", "pylibrb_vcpkg/"]
 
 
 [tool.cibuildwheel]
-# Necessary to see build output from the actual compilation
-build-verbosity = 1
+skip = ["pp37*", "pp38*"]
 
 # Run pytest to ensure that the package was correctly built
 test-command = "pytest {project}/tests"
 test-requires = "pytest"
 
-# Needed for full C++17 support
-[tool.cibuildwheel.macos.environment]
-MACOSX_DEPLOYMENT_TARGET = "10.14"
+macos.archs = ["x86_64", "arm64"]
+macos.environment.MACOSX_DEPLOYMENT_TARGET = "10.14"
