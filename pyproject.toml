@@ -44,7 +44,7 @@ sdist.exclude = ["tests/", "pylibrb_vcpkg/"]
 
 
 [tool.cibuildwheel]
-skip = ["pp37*", "pp38*"]
+skip = ["pp*"]
 
 # Run pytest to ensure that the package was correctly built
 test-command = "pytest {project}/tests"
