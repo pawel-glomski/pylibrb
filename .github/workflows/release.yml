@@ -48,11 +48,11 @@ jobs:
       with:
         submodules: true
 
-      # vcpkg
-      - name: Setup vcpkg (it does not install any package yet)
-        uses: lukka/run-vcpkg@v11
-        with:
-          vcpkgDirectory: '${{ env.PYLIBRB_VCPKG_ROOT }}'
+    # vcpkg
+    - name: Setup vcpkg (it does not install any package yet)
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgDirectory: '${{ env.PYLIBRB_VCPKG_ROOT }}'
 
     - uses: pypa/cibuildwheel@v2.16.2
       env:
