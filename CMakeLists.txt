@@ -1,5 +1,15 @@
 cmake_minimum_required(VERSION 3.26)
 
+if (NOT DEFINED CMAKE_BUILD_TYPE)
+    message(WARNING "\
+        CMAKE_BUILD_TYPE should be defined and it must match `cmake.build-type`. We will try to
+        build the Release version...")
+    set(CMAKE_BUILD_TYPE "Release")
+    # This is important: CMake will change the order of paths that `pkg_check_modules` uses to find
+    # libraries. pylibrb extension must link to the same windows runtime libraries as the found
+    # Rubberbind library, so their build types must match.
+endif()
+
 project(pylibrb LANGUAGES CXX)
 
 if (NOT SKBUILD)
@@ -23,6 +33,10 @@ if (NOT SKBUILD)
   You may optionally add -Ceditable.rebuild=true to auto-rebuild when
   the package is imported. Otherwise, you need to re-run the above
   after editing C++ files.")
+endif()
+
+if (DEFINED CMAKE_TOOLCHAIN_FILE)
+    message(STATUS "Using a toolchain: ${CMAKE_TOOLCHAIN_FILE}")
 endif()
 
 # Try to import all Python components potentially needed by nanobind

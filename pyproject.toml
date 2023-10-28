@@ -27,13 +27,14 @@ requires = ["scikit-build-core >=0.6", "nanobind >=1.5.2"]
 build-backend = "scikit_build_core.build"
 
 [tool.scikit-build]
-wheel.packages = ["src/pylibrb"]
 cmake.build-type = "Release"
 
-# set the environment variable instead: CMAKE_TOOLCHAIN_FILE=...
-# cmake.args = [
-#     "-DCMAKE_TOOLCHAIN_FILE=./pylibrb_vcpkg/scripts/buildsystems/vcpkg.cmake",
-# ]
+# CMAKE_TOOLCHAIN_FILE should be set by the user
+# or libraries should be discoverable by `pkg-config` and `find_package()`
+cmake.args = [
+    # "-DCMAKE_TOOLCHAIN_FILE=./pylibrb_vcpkg/scripts/buildsystems/vcpkg.cmake",
+    "-DCMAKE_BUILD_TYPE=Release", # this MUST match cmake.build-type
+]
 
 # Setuptools-style build caching in a local directory
 build-dir = "build/{wheel_tag}"

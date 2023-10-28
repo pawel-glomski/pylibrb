@@ -1,7 +1,7 @@
 {
     "default-registry": {
         "kind": "git",
-        "baseline": "d0b6f3ce6d5c093a656555ec094021a0411a3927",
+        "baseline": "5e35c24f3efd5667c1968e27a751a214da48c3b0",
         "repository": "https://github.com/pawel-glomski/pylibrb_vcpkg"
     },
     "registries": []

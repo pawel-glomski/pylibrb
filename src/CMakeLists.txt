@@ -3,10 +3,15 @@
 
 find_package(fmt CONFIG REQUIRED)
 find_package(PkgConfig)
-pkg_check_modules(rubberband REQUIRED IMPORTED_TARGET rubberband)
+pkg_check_modules(RUBBERBAND REQUIRED rubberband)
 
-message(STATUS "Rubberband's LIBRARY_DIRS: ${rubberband_LIBRARY_DIRS}")
-message(STATUS "Rubberband's LIBRARIES: ${rubberband_LIBRARIES}")
+if (WIN32)
+    # fftw adds `m` (math.h) to the dependencies for some reason
+    message(STATUS "Rubberband's LIBRARIES before: ${RUBBERBAND_LIBRARIES}")
+    string(REPLACE ";m;" ";" RUBBERBAND_LIBRARIES "${RUBBERBAND_LIBRARIES}")
+    string(REGEX REPLACE ";m$" "" RUBBERBAND_LIBRARIES "${RUBBERBAND_LIBRARIES}")
+    message(STATUS "Rubberband's LIBRARIES after: ${RUBBERBAND_LIBRARIES}")
+endif()
 
 ####################################################################################################
 # bindings
@@ -29,14 +34,26 @@ nanobind_add_module(
 
 target_link_libraries(
     pylibrb_ext
-    PRIVATE
+    PUBLIC
     fmt::fmt
-    PkgConfig::rubberband
+    ${RUBBERBAND_LIBRARIES}
 )
 
 if(APPLE)
   target_link_libraries(pylibrb_ext PRIVATE "-framework Accelerate")
 endif()
+
+target_link_directories(
+    pylibrb_ext
+    PUBLIC
+    ${RUBBERBAND_LIBRARY_DIRS}
+)
+target_include_directories(
+    pylibrb_ext
+    PUBLIC
+    ${RUBBERBAND_INCLUDE_DIRS}
+)
+
 
 if(WIN32)
   target_compile_definitions(pylibrb_ext PRIVATE NOMINMAX)
