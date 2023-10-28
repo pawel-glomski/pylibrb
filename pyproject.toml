@@ -51,4 +51,4 @@ test-command = "pytest {project}/tests"
 test-requires = "pytest"
 
 macos.archs = ["x86_64", "arm64"]
-macos.environment.MACOSX_DEPLOYMENT_TARGET = "10.14"
+# Do not set `macos.environment` here! Do it in .yml files
