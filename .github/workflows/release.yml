@@ -39,18 +39,15 @@ jobs:
       PYLIBRB_VCPKG_ROOT: ${{ github.workspace }}/pylibrb_vcpkg
 
     steps:
-    - name: macOS stuff
-      if: runner.os == 'macOS'
-      # - set minimal macOS version
-      # - install pkg-config (we cannot use `pkgconf` tool because of cross-compilaton - vcpkg
-      #   builds it for ARM, while it should be the runner's architecture (x86-64))
-      run: |
-        echo "MACOS_DEPLOYMENT_TARGET=10.14" >> $GITHUB_ENV
-        brew install pkg-config
-
     - uses: actions/checkout@v4
       with:
         submodules: true
+
+    - name: macOS stuff
+      if: runner.os == 'macOS'
+      # - install pkg-config (we cannot use `pkgconf` tool because of cross-compilaton - vcpkg
+      #   builds it for ARM, while it should be the runner's architecture (x86-64))
+      run: brew install pkg-config
 
     # vcpkg
     - name: Setup vcpkg (it does not install any package yet)

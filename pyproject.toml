@@ -45,7 +45,7 @@ sdist.exclude = ["tests/", "pylibrb_vcpkg/"]
 
 [tool.cibuildwheel]
 build-verbosity = 1
-skip = ["pp*"]
+skip = ["pp*", "*musllinux*"]
 
 # Run pytest to ensure that the package was correctly built
 test-command = "pytest {project}/tests"
