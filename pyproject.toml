@@ -47,13 +47,14 @@ sdist.exclude = ["tests/", "pylibrb_vcpkg/"]
 build-verbosity = 1
 skip = ["pp*", "*musllinux*"]
 
+environment.CMAKE_TOOLCHAIN_FILE = "./pylibrb_vcpkg/scripts/buildsystems/vcpkg.cmake"
+
 # Run pytest to ensure that the package was correctly built
 test-command = "pytest {project}/tests"
 test-requires = "pytest"
 
 [tool.cibuildwheel.linux]
 archs = ["auto64"]
-environment.CMAKE_TOOLCHAIN_FILE = "./pylibrb_vcpkg/scripts/buildsystems/vcpkg.cmake"
 
 [tool.cibuildwheel.windows]
 archs = ["auto64"]
@@ -61,3 +62,4 @@ archs = ["auto64"]
 [tool.cibuildwheel.macos]
 archs = ["x86_64", "arm64"]
 environment.MACOSX_DEPLOYMENT_TARGET = "10.14"
+environment.CMAKE_TOOLCHAIN_FILE = "./pylibrb_vcpkg/scripts/buildsystems/vcpkg.cmake"
