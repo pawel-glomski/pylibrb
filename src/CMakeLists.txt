@@ -15,12 +15,6 @@ if (WIN32)
     message(STATUS "Rubberband's LIBRARIES after: ${RUBBERBAND_LIBRARIES}")
 endif()
 
-check_library_exists(atomic __atomic_fetch_add_4 "" HAVE_LIBATOMIC)
-if (HAVE_LIBATOMIC)
-  set(RUBBERBAND_LIBRARIES "${RUBBERBAND_LIBRARIES};atomic")
-endif()
-
-
 ####################################################################################################
 # bindings
 

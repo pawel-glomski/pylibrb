@@ -53,13 +53,11 @@ test-requires = "pytest"
 
 [tool.cibuildwheel.linux]
 archs = ["auto64"]
-environment.CC = "clang"
-environment.CXX = "clang++"
 
 [tool.cibuildwheel.windows]
 archs = ["auto64"]
 
+
 [tool.cibuildwheel.macos]
 # Do not set `macos.environment` here! Do it in .yml files
 archs = ["x86_64", "arm64"]
-before-build = ["export CC=clang", "export CXX=clang++"]

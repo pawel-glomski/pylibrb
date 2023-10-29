@@ -23,12 +23,6 @@ jobs:
       PYLIBRB_VCPKG_ROOT: ${{ github.workspace }}/pylibrb_vcpkg
 
     steps:
-    - name: Set compiler
-      if: runner.os != 'Windows'
-      run: |
-        echo "CC=clang" >> $GITHUB_ENV
-        echo "CXX=clang++" >> $GITHUB_ENV
-
     - uses: actions/checkout@v4
       with:
         submodules: recursive
