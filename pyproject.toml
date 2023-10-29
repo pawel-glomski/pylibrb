@@ -44,11 +44,19 @@ sdist.exclude = ["tests/", "pylibrb_vcpkg/"]
 
 
 [tool.cibuildwheel]
+build-verbosity = 1
 skip = ["pp*"]
 
 # Run pytest to ensure that the package was correctly built
 test-command = "pytest {project}/tests"
 test-requires = "pytest"
 
-macos.archs = ["x86_64", "arm64"]
+[tool.cibuildwheel.linux]
+archs = ["auto64"]
+
+[tool.cibuildwheel.windows]
+archs = ["auto64"]
+
+[tool.cibuildwheel.macos]
 # Do not set `macos.environment` here! Do it in .yml files
+archs = ["x86_64", "arm64"]
