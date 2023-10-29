@@ -35,9 +35,6 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
 
-    env:
-      PYLIBRB_VCPKG_ROOT: ${{ github.workspace }}/pylibrb_vcpkg
-
     steps:
     - uses: actions/checkout@v4
       with:
@@ -53,13 +50,9 @@ jobs:
     - name: Setup vcpkg (it does not install any package yet)
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgDirectory: '${{ env.PYLIBRB_VCPKG_ROOT }}'
+        vcpkgDirectory: '${{ github.workspace }}/pylibrb_vcpkg'
 
     - uses: pypa/cibuildwheel@v2.16.2
-      env:
-        CIBW_ENVIRONMENT: >
-          CMAKE_TOOLCHAIN_FILE='${{ env.PYLIBRB_VCPKG_ROOT }}/scripts/buildsystems/vcpkg.cmake'
-          MACOSX_DEPLOYMENT_TARGET='10.14'
 
     - name: Verify clean directory
       run: git diff --exit-code
