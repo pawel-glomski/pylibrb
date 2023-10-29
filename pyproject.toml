@@ -30,8 +30,8 @@ cmake.build-type = "Release"
 # CMAKE_TOOLCHAIN_FILE should be set by the user
 # or libraries should be discoverable by `pkg-config` and `find_package()`
 cmake.args = [
-    "-DCMAKE_TOOLCHAIN_FILE=./pylibrb_vcpkg/scripts/buildsystems/vcpkg.cmake",
-    "-DCMAKE_BUILD_TYPE=Release",                                              # this MUST match cmake.build-type
+    # "-DCMAKE_TOOLCHAIN_FILE=./pylibrb_vcpkg/scripts/buildsystems/vcpkg.cmake",
+    "-DCMAKE_BUILD_TYPE=Release", # this MUST match cmake.build-type
 ]
 
 # Setuptools-style build caching in a local directory
@@ -53,6 +53,8 @@ test-requires = "pytest"
 
 [tool.cibuildwheel.linux]
 archs = ["auto64"]
+environment.CC = "clang"
+environment.CXX = "clang++"
 
 [tool.cibuildwheel.windows]
 archs = ["auto64"]
@@ -60,3 +62,4 @@ archs = ["auto64"]
 [tool.cibuildwheel.macos]
 # Do not set `macos.environment` here! Do it in .yml files
 archs = ["x86_64", "arm64"]
+before-build = ["export CC=clang", "export CXX=clang++"]

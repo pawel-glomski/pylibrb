@@ -23,10 +23,11 @@ jobs:
       PYLIBRB_VCPKG_ROOT: ${{ github.workspace }}/pylibrb_vcpkg
 
     steps:
-    - name: Set min macOS version
-      if: runner.os == 'macOS'
+    - name: Set compiler
+      if: runner.os != 'Windows'
       run: |
-        echo "MACOS_DEPLOYMENT_TARGET=10.14" >> $GITHUB_ENV
+        echo "CC=clang" >> $GITHUB_ENV
+        echo "CXX=clang++" >> $GITHUB_ENV
 
     - uses: actions/checkout@v4
       with:
@@ -47,6 +48,7 @@ jobs:
       run: pip install --verbose .
       env:
         CMAKE_TOOLCHAIN_FILE: ${{ env.PYLIBRB_VCPKG_ROOT }}/scripts/buildsystems/vcpkg.cmake
+        MACOS_DEPLOYMENT_TARGET: 10.14
 
     - name: Test
       run: |
