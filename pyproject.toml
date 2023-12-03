@@ -1,12 +1,12 @@
 [project]
 name = "pylibrb"
-version = "0.1.1"
+version = "0.1.2"
 description = "Python bindings for the RubberBand library"
 
 authors = [{ name = "Paweł Głomski", email = "pglomski.dev@gmail.com" }]
 urls.Homepage = "https://github.com/pawel-glomski/pylibrb"
 
-requires-python = ">=3.8, <=3.12"
+requires-python = ">=3.8"
 dependencies = ['numpy']
 
 readme = "README.md"
