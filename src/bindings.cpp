@@ -290,6 +290,13 @@ void define_stretcher_method_study(nb::class_<rb::RubberBandStretcher>& cls)
       "study",
       [](rb::RubberBandStretcher& stretcher, NbAudioArrayArg_t const audio, bool const final = false)
       {
+        nb::gil_scoped_release gil_released;
+
+        if (audio.ndim() != AudioShape_t::size)
+        {
+          throw nb::value_error("Wrong array shape");
+        }
+
         size_t const channels_num = stretcher.getChannelCount();
         size_t const samples_num = audio.shape(RB_SAMPLES_AXIS);
         if (audio.shape(RB_CHANNELS_AXIS) != channels_num)
@@ -301,8 +308,7 @@ void define_stretcher_method_study(nb::class_<rb::RubberBandStretcher>& cls)
         stretcher.study(audio_per_channel.data(), samples_num, final);
       },
       "audio"_a,
-      "final"_a = false,
-      nb::call_guard<nb::gil_scoped_release>());
+      "final"_a = false);
 }
 
 void define_stretcher_method_process(nb::class_<rb::RubberBandStretcher>& cls)
@@ -311,6 +317,13 @@ void define_stretcher_method_process(nb::class_<rb::RubberBandStretcher>& cls)
       "process",
       [](rb::RubberBandStretcher& stretcher, NbAudioArrayArg_t const audio, bool const final = false)
       {
+        nb::gil_scoped_release gil_released;
+
+        if (audio.ndim() != AudioShape_t::size)
+        {
+          throw nb::value_error("Wrong array shape");
+        }
+
         size_t const channels_num = stretcher.getChannelCount();
         size_t const samples_num = audio.shape(RB_SAMPLES_AXIS);
         if (audio.shape(RB_CHANNELS_AXIS) != channels_num)
@@ -322,8 +335,7 @@ void define_stretcher_method_process(nb::class_<rb::RubberBandStretcher>& cls)
         stretcher.process(audio_per_channel.data(), samples_num, final);
       },
       "audio"_a,
-      "final"_a = false,
-      nb::call_guard<nb::gil_scoped_release>());
+      "final"_a = false);
 }
 
 void define_stretcher_method_retrieve(nb::class_<rb::RubberBandStretcher>& cls)
